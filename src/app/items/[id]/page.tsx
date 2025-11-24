@@ -68,11 +68,11 @@ export default async function ItemDetail({params}: { params: { id: string } }) {
               </div>
               <div>
                 <label className="sr-only" htmlFor="start">Start date</label>
-                <input id="start" name="start" type="date" required className="w-full rounded-xl border px-4 py-3 text-sm" />
+                <input id="start" name="start" type="date" required className="w-full rounded-xl border px-4 py-3 text-sm dark:[color-scheme:dark]" />
               </div>
               <div>
                 <label className="sr-only" htmlFor="end">End date</label>
-                <input id="end" name="end" type="date" required className="w-full rounded-xl border px-4 py-3 text-sm" />
+                <input id="end" name="end" type="date" required className="w-full rounded-xl border px-4 py-3 text-sm dark:[color-scheme:dark]" />
               </div>
               <div className="sm:col-span-2">
                 <button className="w-full sm:w-auto rounded-xl bg-fuchsia-600 text-white px-6 py-3 text-sm font-semibold hover:bg-fuchsia-500">

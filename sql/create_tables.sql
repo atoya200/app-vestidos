@@ -1,0 +1,73 @@
+CREATE TABLE USERS (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULLABLE
+);
+
+CREATE TABLE ARTICLE_TYPES (
+    id SERIAL PRIMARY KEY,
+    type_name VARCHAR(50) NOT NULL,
+    active BOOLEAN DEFAULT TRUE
+);
+
+CREATE TABLE SIZES (
+    id SERIAL PRIMARY KEY,
+    size_label VARCHAR(10) NOT NULL,
+    description VARCHAR(100)
+    active BOOLEAN DEFAULT TRUE
+);
+
+CREATE TABLE COLORS (
+    id SERIAL PRIMARY KEY,
+    color_name VARCHAR(50) NOT NULL,
+    hex_value VARCHAR(7) NOT NULL,
+    active BOOLEAN DEFAULT TRUE
+);
+
+
+CREATE TABLE ARTICLES(
+    id SERIAL PRIMARY KEY,
+    article_type_id INT REFERENCES ARTICLE_TYPES(id),
+    size_id INT REFERENCES SIZES(id),
+    color_id INT REFERENCES COLORS(id),
+    style VARCHAR(200) NOT NULL,
+    price_for_day DECIMAL(10, 2) NOT NULL,
+    stock INT NOT NULL,
+    image_url VARCHAR(255),
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    modifyed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    user_modifyed_id INT REFERENCES USERS(id),
+    deleted_at TIMESTAMP NULLABLE,
+    user_delete_id INT REFERENCES USERS(id),
+    active BOOLEAN DEFAULT TRUE
+);
+
+
+CREATE TABLE ORDER_STATUSES (
+    id SERIAL PRIMARY KEY,
+    status_name VARCHAR(50) NOT NULL,
+    description VARCHAR(255),
+    active BOOLEAN DEFAULT TRUE
+);
+
+
+CREATE TABLE ORDERS (
+    id SERIAL PRIMARY KEY,
+    article_id INT REFERENCES ARTICLES(id),
+    user_id INT REFERENCES USERS(id),
+    start_date TIMESTAMP NOT NULL,
+    end_date TIMESTAMP NOT NULL,
+    status_id INT REFERENCES ORDER_STATUSES(id),
+    canceled_by_user_id INT REFERENCES USERS(id) NULLABLE,
+    price_for_day DECIMAL(10, 2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    canceled_at TIMESTAMP NULLABLE,
+    phone VARCHAR(20) NOT NULL,
+    full_name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    number_days INT NOT NULL
+);

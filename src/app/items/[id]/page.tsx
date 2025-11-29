@@ -67,11 +67,11 @@ export default async function ItemDetail({params}: { params: { id: string } }) {
                 <input id="phone" name="phone" required placeholder="Phone" className="w-full rounded-xl border px-4 py-3 text-sm" />
               </div>
               <div>
-                <label className="sr-only" htmlFor="start">Start date</label>
+                <label className="block text-sm font-medium mb-1.5" htmlFor="start">Fecha de inicio</label>
                 <input id="start" name="start" type="date" required className="w-full rounded-xl border px-4 py-3 text-sm dark:[color-scheme:dark]" />
               </div>
               <div>
-                <label className="sr-only" htmlFor="end">End date</label>
+                <label className="block text-sm font-medium mb-1.5" htmlFor="end">Fecha de fin</label>
                 <input id="end" name="end" type="date" required className="w-full rounded-xl border px-4 py-3 text-sm dark:[color-scheme:dark]" />
               </div>
               <div className="sm:col-span-2">

@@ -113,21 +113,23 @@ export default function Home() {
           </div>
           <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {featured.map((item) => (
-              <div
+              <Link
                 key={item.id}
-                className="group rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden hover:shadow-md transition-shadow"
+                href={`/items/${item.id}`}
+                className="group rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden hover:shadow-md transition-shadow block"
               >
-                <div className="aspect-[3/4] relative bg-slate-100 dark:bg-slate-800">
+                <div className="aspect-[3/4] relative overflow-hidden rounded-lg">
                   <Image
                     src={item.image}
                     alt={item.alt}
                     fill
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                    className="object-cover"
+                    className="object-contain rounded-lg"
+                    quality={95}
                     priority={item.id === 1}
                   />
-                  <div className="absolute inset-0 flex items:end p-4">
-                    <span className="inline-flex items-center rounded-full bg-white/85 dark:bg-slate-800/80 backdrop-blur px-2.5 py-1 text-xs font-medium text-slate-800 dark:text-slate-100">
+                  <div className="absolute inset-0 flex items-end p-3">
+                    <span className="rounded-full bg-white/85 dark:bg-slate-800/80 px-2.5 py-1 text-xs font-medium text-slate-800 dark:text-slate-100">
                       From ${item.price}/day
                     </span>
                   </div>
@@ -136,15 +138,12 @@ export default function Home() {
                   <p className="font-medium">{item.name}</p>
                   <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">Free cleaning • 2–7 day rentals</p>
                   <div className="mt-4">
-                    <Link
-                      href={`/items/${item.id}`}
-                      className="inline-flex items-center rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2 text-sm hover:bg-slate-50 dark:hover:bg-slate-800"
-                    >
+                    <span className="inline-flex items-center rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2 text-sm hover:bg-slate-50 dark:hover:bg-slate-800">
                       View details
-                    </Link>
+                    </span>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </section>

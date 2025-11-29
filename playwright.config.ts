@@ -5,7 +5,7 @@ dotenv.config({ path: '.env.playwright' });
 
 export default defineConfig({
   testDir: './test',
-  fullyParallel: true,
+  fullyParallel: false,
   reporter: 'html',
   use: {
     baseURL: process.env.BASE_URL || 'http://localhost:3000',

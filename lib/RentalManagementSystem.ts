@@ -1,3 +1,5 @@
+import pool from './db';
+
 export type Category = "dress" | "shoes" | "bag" | "jacket";
 
 export type Item = {
@@ -16,6 +18,7 @@ export type Item = {
 export type Rental = {
   id: string;
   itemId: number;
+  sizeId: number;
   start: string; // ISO date (yyyy-mm-dd)
   end: string;   // ISO date (yyyy-mm-dd)
   customer: { name: string; email: string; phone: string };
@@ -75,8 +78,6 @@ const items: Item[] = [
   },
 ];
 
-let rentals: Rental[] = [];
-
 export function listItems(filters?: {
   q?: string;
   category?: Category;
@@ -102,35 +103,192 @@ export function getItem(id: number) {
   return items.find((i) => i.id === id) ?? null;
 }
 
-export function getItemRentals(itemId: number) {
-  return rentals.filter((r) => r.itemId === itemId && r.status === "active");
+export async function getAvailableSizes(itemId: number): Promise<string[]> {
+  try {
+
+    const result = await pool.query(
+      `SELECT DISTINCT s.size_label 
+       FROM articles a
+       JOIN sizes s ON a.size_id = s.id
+       WHERE a.id = $1 AND a.active = true
+       ORDER BY s.id`,
+      [itemId]
+    );
+    
+    if (result.rows.length === 0) {
+      // Si no hay en BD, usar los hardcodeados del item en memoria
+      const item = getItem(itemId);
+      return item?.sizes || [];
+    }
+    
+    return result.rows.map(row => row.size_label);
+  } catch (error) {
+    console.error('Error fetching available sizes:', error);
+    const item = getItem(itemId);
+    return item?.sizes || [];
+  }
+}
+
+export async function getItemRentals(itemId: number, sizeId?: number): Promise<Rental[]> {
+  try {
+    let query = `SELECT 
+      id::text,
+      article_id as "itemId",
+      size_id as "sizeId",
+      TO_CHAR(start_date, 'YYYY-MM-DD') as start,
+      TO_CHAR(end_date, 'YYYY-MM-DD') as end,
+      full_name,
+      email,
+      phone,
+      created_at::text as "createdAt",
+      canceled_at
+    FROM orders 
+    WHERE article_id = $1 AND canceled_at IS NULL`;
+    
+    const params: any[] = [itemId];
+    
+    if (sizeId !== undefined) {
+      query += ` AND size_id = $2`;
+      params.push(sizeId);
+    }
+    
+    query += ` ORDER BY start_date`;
+
+    const result = await pool.query(query, params);
+
+    return result.rows.map(row => ({
+      id: row.id,
+      itemId: row.itemId,
+      sizeId: row.sizeId,
+      start: row.start,
+      end: row.end,
+      customer: {
+        name: row.full_name,
+        email: row.email,
+        phone: row.phone
+      },
+      createdAt: row.createdAt,
+      status: 'active' as const
+    }));
+  } catch (error) {
+    console.error('Error fetching rentals:', error);
+    return [];
+  }
 }
 
 export function hasOverlap(aStart: string, aEnd: string, bStart: string, bEnd: string) {
   return !(aEnd < bStart || bEnd < aStart);
 }
 
-export function isItemAvailable(itemId: number, start: string, end: string) {
-  const rs = getItemRentals(itemId);
+export async function isItemAvailable(itemId: number, sizeId: number, start: string, end: string): Promise<boolean> {
+  const rs = await getItemRentals(itemId, sizeId);
   return rs.every((r) => !hasOverlap(start, end, r.start, r.end));
 }
 
-export function createRental(data: Omit<Rental, "id" | "createdAt" | "status">) {
-  const ok = isItemAvailable(data.itemId, data.start, data.end);
-  if (!ok) return { error: "Item is not available for the selected dates." as const };
-  const id = crypto.randomUUID();
-  const rental: Rental = { ...data, id, createdAt: new Date().toISOString(), status: "active" };
-  rentals.push(rental);
-  return { rental };
+export async function createRental(data: Omit<Rental, "id" | "createdAt" | "status">) {
+  const ok = await isItemAvailable(data.itemId, data.sizeId, data.start, data.end);
+  if (!ok) return { error: "Item not available for selected dates" as const };
+
+  try {
+    const startDate = new Date(data.start);
+    const endDate = new Date(data.end);
+    const numberDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+    
+    const item = getItem(data.itemId);
+    if (!item) return { error: "Item not found" as const };
+
+    const result = await pool.query(
+      `INSERT INTO orders 
+        (article_id, size_id, start_date, end_date, status_id, price_for_day, phone, full_name, email, number_days)
+      VALUES ($1, $2, $3, $4, 1, $5, $6, $7, $8, $9)
+      RETURNING id::text, TO_CHAR(created_at, 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') as created_at`,
+      [
+        data.itemId,
+        data.sizeId,
+        data.start,
+        data.end,
+        item.pricePerDay,
+        data.customer.phone,
+        data.customer.name,
+        data.customer.email,
+        numberDays
+      ]
+    );
+
+    if (!result.rows[0]) {
+      throw new Error('No se pudo crear el registro');
+    }
+
+    const rental: Rental = {
+      id: result.rows[0].id,
+      itemId: data.itemId,
+      sizeId: data.sizeId,
+      start: data.start,
+      end: data.end,
+      customer: data.customer,
+      createdAt: result.rows[0].created_at,
+      status: "active"
+    };
+
+    return { rental };
+  } catch (error) {
+    console.error('Error creating rental:', error);
+    return { error: "Failed to create rental" as const };
+  }
 }
 
-export function listRentals() {
-  return rentals.slice().sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+export async function listRentals(): Promise<Rental[]> {
+  try {
+    const result = await pool.query(
+      `SELECT 
+        id::text,
+        article_id as "itemId",
+        size_id as "sizeId",
+        TO_CHAR(start_date, 'YYYY-MM-DD') as start,
+        TO_CHAR(end_date, 'YYYY-MM-DD') as end,
+        full_name,
+        email,
+        phone,
+        created_at::text as "createdAt",
+        canceled_at
+      FROM orders 
+      ORDER BY created_at DESC`
+    );
+
+    return result.rows.map(row => ({
+      id: row.id,
+      itemId: row.itemId,
+      sizeId: row.sizeId,
+      start: row.start,
+      end: row.end,
+      customer: {
+        name: row.full_name,
+        email: row.email,
+        phone: row.phone
+      },
+      createdAt: row.createdAt,
+      status: row.canceled_at ? 'canceled' as const : 'active' as const
+    }));
+  } catch (error) {
+    console.error('Error listing rentals:', error);
+    return [];
+  }
 }
 
-export function cancelRental(id: string) {
-  const r = rentals.find((x) => x.id === id);
-  if (!r) return { error: "Not found" as const };
-  r.status = "canceled";
-  return { ok: true as const };
+export async function cancelRental(id: string) {
+  try {
+    const result = await pool.query(
+      'UPDATE orders SET canceled_at = CURRENT_TIMESTAMP WHERE id = $1 RETURNING id',
+      [id]
+    );
+    
+    if (result.rowCount === 0) {
+      return { error: "Not found" as const };
+    }
+    
+    return { ok: true as const };
+  } catch (error) {
+    console.error('Error canceling rental:', error);
+    return { error: "Failed to cancel rental" as const };
+  }
 }

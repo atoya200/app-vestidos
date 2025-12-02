@@ -1,5 +1,7 @@
-import * as db from "./db";
-const pool = (db as any).default ?? db;
+//import * as db from "./db";
+//const pool = (db as any).default ?? db;
+
+import { pool } from "./db";
 
 export type Category = "dress" | "shoes" | "bag" | "jacket";
 
@@ -127,10 +129,10 @@ export async function listItems(filters?: ItemFilters): Promise<Item[]> {
     query += ` GROUP BY a.style, a.color_id, at.type_name, a.price_for_day, c.color_name, a.description, a.image_url
                ORDER BY a.style, a.color_id`;
 
-    const result = await pool.query<ItemRow>(query, params);
+    const result = await pool.query(query, params);
 
     const items: Item[] = await Promise.all(
-      result.rows.map(async (row) => {
+      result.rows.map(async (row:any) => {
         const sizes = await getAvailableSizes(row.id);
 
         return {
@@ -163,7 +165,7 @@ export async function listItems(filters?: ItemFilters): Promise<Item[]> {
 
 export async function getItem(id: number): Promise<Item | null> {
   try {
-    const result = await pool.query<ItemRow>(
+    const result = await pool.query(
       `
       SELECT 
         a.id,
@@ -222,22 +224,22 @@ export async function getAvailableSizes(itemId: number): Promise<string[]> {
     const { style, color_id } = itemResult.rows[0];
     
     // Find all sizes available for this style+color combination
-    const result = await pool.query(
+    const {rows} = await pool.query(
       `
-      SELECT DISTINCT s.size_label 
+      select  distinct  s.size_label 
       FROM articles a
       JOIN sizes s ON a.size_id = s.id
-      WHERE a.style = $1 
+      WHERE a.size_id = $1
         AND a.color_id = $2
-        AND a.active = TRUE 
+        AND a.active = true 
         AND a.stock > 0 
-        AND s.active = TRUE
-      ORDER BY s.id
+        AND s.active = true
+      ORDER BY s.size_label
       `,
       [style, color_id]
     );
 
-    return result.rows.map((row) => row.size_label as string);
+    return rows.map((row:any) => row.size_label as string);
   } catch (error) {
     console.error("Error fetching available sizes:", error);
     return [];
@@ -275,9 +277,9 @@ export async function getItemRentals(
 
     query += ` ORDER BY start_date`;
 
-    const result = await pool.query<RentalRow>(query, params);
+    const result = await pool.query(query, params);
 
-    return result.rows.map((row) => ({
+    return result.rows.map((row:any) => ({
       id: row.id,
       itemId: row.itemId,
       sizeId: row.sizeId,
@@ -394,7 +396,7 @@ export async function createRental(
 
 export async function listRentals(): Promise<Rental[]> {
   try {
-    const result = await pool.query<RentalRow>(
+    const result = await pool.query(
       `
       SELECT 
         id::text,
@@ -412,7 +414,7 @@ export async function listRentals(): Promise<Rental[]> {
       `
     );
 
-    return result.rows.map((row) => ({
+    return result.rows.map((row:any) => ({
       id: row.id,
       itemId: row.itemId,
       sizeId: row.sizeId,

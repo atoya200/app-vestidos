@@ -7,9 +7,10 @@ import { StaticImport } from "next/dist/shared/lib/get-img-props";
 import { Key } from "react";
 import BackButton from "../../components/BackButton";
 
-export default async function ItemDetail({params}: { params: { id: string } }) {
-    const id = Number(params.id);
-    const item = getItem(id);
+export default async function ItemDetail({params}: { params: Promise<{ id: string }> }) {
+    const { id: idStr } = await params;
+    const id = Number(idStr);
+    const item = await getItem(id);
     if (!item) return notFound();
 
     // Generate CSRF token; cookie will be set if missing

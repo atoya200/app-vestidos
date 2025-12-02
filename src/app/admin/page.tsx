@@ -15,7 +15,7 @@ export default async function Page() {
   if (!isAdmin()) redirect("/admin/login");
   const csrf = await getOrCreateCsrfToken();
 
-  const items = listItems();
+  const items = await listItems();
   const rentals = listRentals();
 
   return (

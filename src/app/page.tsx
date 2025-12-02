@@ -1,13 +1,16 @@
 import Image from "next/image";
 import Link from "next/link";
+import { listItems } from "../../lib/RentalManagementSystem";
 
-export default function Home() {
-  const featured = [
-    { id: 1, name: "Silk Evening Gown", price: 79, image: "/images/dresses/silk-evening-gown.jpg", alt: "Model wearing a champagne silk evening gown" },
-    { id: 2, name: "Black Tie Dress", price: 99, image: "/images/dresses/black-tie-dress.jpg", alt: "Elegant black tie dress" },
-    { id: 3, name: "Floral Midi Dress", price: 49, image: `/images/dresses/floral-midi-dress.jpg`, alt: "Floral midi dress perfect for daytime events" },
-    { id: 4, name: "Velvet Cocktail Dress", price: 59, image: "/images/dresses/velvet-cocktail-dress.jpg", alt: "Velvet cocktail dress in deep tones" },
-  ];
+export default async function Home() {
+  const allItems = await listItems();
+  const featured = allItems.slice(0, 4).map(item => ({
+    id: item.id,
+    name: item.name,
+    price: item.pricePerDay,
+    image: item.images[0],
+    alt: item.alt
+  }));
 
   const steps = [
     { emoji: "🧭", title: "Browse", text: "Find styles by size, color, designer, or occasion." },

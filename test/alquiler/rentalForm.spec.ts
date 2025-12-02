@@ -47,11 +47,10 @@ test.describe.serial('Rental flow - sequential tests', () => {
     await page.fill('input[name="phone"]', '+598 99 123 456');
     await page.fill('input[name="start"]', startDateStr);
     await page.fill('input[name="end"]', endDateStr);
-    
-    // Enviar el formulario
+
     await page.getByRole('button', { name: /request rental/i }).click();
     
-    // Esperar y verificar el mensaje de éxito
+
     await expect(page.locator('text=Rental successfully completed')).toBeVisible({ timeout: 10000 });
 });
 
@@ -80,10 +79,8 @@ test('Intentar alquilar fechas ya reservadas', async ({ page }) => {
     await page.fill('input[name="start"]', startDateStr);
     await page.fill('input[name="end"]', endDateStr);
     
-    // Enviar el formulario
     await page.getByRole('button', { name: /request rental/i }).click();
     
-    // Verificar que muestra mensaje de error sobre fechas ocupadas
     await expect(page.locator('text=Item is already rented for the selected dates')).toBeVisible({ timeout: 10000 });
 });
 
@@ -112,24 +109,22 @@ test('Intentar alquilar con fecha de inicio en el pasado', async ({ page }) => {
     
     await page.getByRole('button', { name: /request rental/i }).click();
     
-    // Verificar mensaje de error específico para fecha de inicio en el pasado
     await expect(page.locator('text=You cannot select a start date in the past')).toBeVisible({ timeout: 10000 });
 });
 
 test('Intentar alquilar con ambas fechas en el pasado', async ({ page }) => {
     const today = new Date();
     const pastStartDate = new Date(today);
-    pastStartDate.setDate(today.getDate() - 10); // 10 días en el pasado
+    pastStartDate.setDate(today.getDate() - 10); 
     
     const pastEndDate = new Date(today);
-    pastEndDate.setDate(today.getDate() - 5); // 5 días en el pasado
+    pastEndDate.setDate(today.getDate() - 5);
     
     const pastStartStr = formatDate(pastStartDate);
     const pastEndStr = formatDate(pastEndDate);
     
     await page.goto(appUrls.item(1));
     
-    // Obtener y seleccionar primer talle disponible
     const availableSizes = await getAvailableSizesFromPage(page, 1);
     await page.getByRole('button', { name: availableSizes[0] }).click();
     
@@ -141,17 +136,16 @@ test('Intentar alquilar con ambas fechas en el pasado', async ({ page }) => {
     
     await page.getByRole('button', { name: /request rental/i }).click();
     
-    // Verificar mensaje de error para fecha de inicio en el pasado (se valida primero)
     await expect(page.locator('text=You cannot select a start date in the past')).toBeVisible({ timeout: 10000 });
 });
 
 test('Intentar alquilar con fecha de fin anterior a fecha de inicio', async ({ page }) => {
     const today = new Date();
     const startDate = new Date(today);
-    startDate.setDate(today.getDate() + 10); // 10 días en el futuro
+    startDate.setDate(today.getDate() + 10); 
     
     const endDate = new Date(today);
-    endDate.setDate(today.getDate() + 5); // 5 días en el futuro 
+    endDate.setDate(today.getDate() + 5); 
     
     const startDateStr = formatDate(startDate);
     const endDateStr = formatDate(endDate);
@@ -173,56 +167,4 @@ test('Intentar alquilar con fecha de fin anterior a fecha de inicio', async ({ p
     // Verificar mensaje de error para fecha de fin anterior a inicio
     await expect(page.locator('text=End date must be after start date')).toBeVisible({ timeout: 10000 });
 });
-
-// NOTA: Este test está comentado porque la estructura actual de la base de datos
-// tiene un solo talle por artículo (size_id en la tabla articles)
-// Para soportar múltiples talles del mismo estilo, necesitaríamos múltiples filas en articles
-/*
-test('Alquilar el mismo artículo con diferente talle en las mismas fechas', async ({ page }) => {
-    // Calcular fechas para el alquiler
-    const today = new Date();
-    const startDate = new Date(today);
-    startDate.setDate(today.getDate() + 12);
-    
-    const endDate = new Date(startDate);
-    endDate.setDate(startDate.getDate() + 3);
-    
-    const startDateStr = formatDate(startDate);
-    const endDateStr = formatDate(endDate);
-    
-    // Primera reserva con talle S
-    await page.goto(appUrls.item(1));
-    await page.getByRole('button', { name: 'S' }).click();
-    await page.fill('input[name="name"]', 'Usuario Talle S');
-    await page.fill('input[name="email"]', 's@test.com');
-    await page.fill('input[name="phone"]', '+598 99 111 111');
-    await page.fill('input[name="start"]', startDateStr);
-    await page.fill('input[name="end"]', endDateStr);
-    await page.getByRole('button', { name: /request rental/i }).click();
-    await expect(page.locator('text=Rental successfully completed')).toBeVisible({ timeout: 10000 });
-    
-    // Segunda reserva con talle L en las mismas fechas (debería funcionar)
-    await page.goto(appUrls.item(1));
-    await page.getByRole('button', { name: 'L' }).click();
-    await page.fill('input[name="name"]', 'Usuario Talle L');
-    await page.fill('input[name="email"]', 'l@test.com');
-    await page.fill('input[name="phone"]', '+598 99 222 222');
-    await page.fill('input[name="start"]', startDateStr);
-    await page.fill('input[name="end"]', endDateStr);
-    await page.getByRole('button', { name: /request rental/i }).click();
-    await expect(page.locator('text=Rental successfully completed')).toBeVisible({ timeout: 10000 });
-    
-    // Tercera reserva intentando usar talle S de nuevo (debería fallar)
-    await page.goto(appUrls.item(1));
-    await page.getByRole('button', { name: 'S' }).click();
-    await page.fill('input[name="name"]', 'Usuario Talle S Again');
-    await page.fill('input[name="email"]', 's2@test.com');
-    await page.fill('input[name="phone"]', '+598 99 333 333');
-    await page.fill('input[name="start"]', startDateStr);
-    await page.fill('input[name="end"]', endDateStr);
-    await page.getByRole('button', { name: /request rental/i }).click();
-    await expect(page.locator('text=Item is already rented for the selected dates')).toBeVisible({ timeout: 10000 });
-});
-*/
-
 });

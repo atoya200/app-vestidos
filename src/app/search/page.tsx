@@ -4,7 +4,7 @@ import {listItems, type Category} from "../../../lib/RentalManagementSystem";
 import BackButton from "../components/BackButton";
 
 type SearchParams = {
-  q?: string;
+  q?: string; 
   category?: Category | "";
   size?: string;
   color?: string;
@@ -13,9 +13,10 @@ type SearchParams = {
   end?: string;
 };
 
-export default function Page({ searchParams }: { searchParams: SearchParams }) {
-  const { q = "", category = "", size = "", color = "", style = "" } = searchParams;
-  const items = listItems({
+export default async function Page({ searchParams }: { searchParams: Promise<SearchParams> }) {
+  const params = await searchParams;
+  const { q = "", category = "", size = "", color = "", style = "" } = params;
+  const items = await listItems({
     q,
     category: category || undefined,
     size: size || undefined,

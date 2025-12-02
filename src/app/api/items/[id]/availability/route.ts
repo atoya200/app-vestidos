@@ -1,19 +1,26 @@
 import { NextResponse } from "next/server";
 import {getItem, getItemRentals} from "@/lib/RentalManagementSystem";
-import { getSizeId } from "@/lib/sizeHelper";
+import pool from "@/lib/db";
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   const id = Number(params.id);
-  const item = getItem(id);
+  const item = await getItem(id);
   if (!item) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  // Obtener el parámetro de talle de la URL
   const { searchParams } = new URL(request.url);
   const sizeLabel = searchParams.get('size');
-  const sizeId = sizeLabel ? getSizeId(sizeLabel) : undefined;
+  
+  let sizeId: number | undefined;
+  if (sizeLabel) {
+    const result = await pool.query(
+      'SELECT id FROM sizes WHERE UPPER(size_label) = UPPER($1) AND active = true',
+      [sizeLabel]
+    );
+    sizeId = result.rows[0]?.id;
+  }
 
-  const rentals = (await getItemRentals(id, sizeId ?? undefined)).map((r) => ({ start: r.start, end: r.end }));
+  const rentals = (await getItemRentals(id, sizeId)).map((r) => ({ start: r.start, end: r.end }));
   return NextResponse.json({ rentals });
 }

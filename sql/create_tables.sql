@@ -36,6 +36,7 @@ CREATE TABLE ARTICLES(
     style VARCHAR(200) NOT NULL,
     price_for_day DECIMAL(10, 2) NOT NULL,
     stock INT NOT NULL,
+    reserves INT NOT NULL DEFAULT 0,
     image_url VARCHAR(255),
     description TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

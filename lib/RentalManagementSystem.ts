@@ -1,7 +1,8 @@
 //import * as db from "./db";
 //const pool = (db as any).default ?? db;
 
-import { pool } from "./db";
+import { Console } from "console";
+import pool from "./db";
 
 export type Category = "dress" | "shoes" | "bag" | "jacket";
 
@@ -222,6 +223,7 @@ export async function getAvailableSizes(itemId: number): Promise<string[]> {
     if (itemResult.rows.length === 0) return [];
     
     const { style, color_id } = itemResult.rows[0];
+
     
     // Find all sizes available for this style+color combination
     const {rows} = await pool.query(
@@ -229,7 +231,7 @@ export async function getAvailableSizes(itemId: number): Promise<string[]> {
       select  distinct  s.size_label 
       FROM articles a
       JOIN sizes s ON a.size_id = s.id
-      WHERE a.size_id = $1
+      WHERE a.style = $1
         AND a.color_id = $2
         AND a.active = true 
         AND a.stock > 0 
@@ -252,20 +254,20 @@ export async function getItemRentals(
 ): Promise<Rental[]> {
   try {
     let query = `
-      SELECT 
-        id::text,
+       SELECT
+        o.id::text,
         article_id AS "itemId",
-        size_id AS "sizeId",
+        a.size_id  AS "sizeId",
         TO_CHAR(start_date, 'YYYY-MM-DD') AS start,
         TO_CHAR(end_date, 'YYYY-MM-DD') AS "end",
         full_name,
         email,
         phone,
-        created_at::text AS "createdAt",
+        o.created_at::text AS "createdAt",
         canceled_at
-      FROM orders 
-      WHERE article_id = $1 
-        AND canceled_at IS NULL
+      FROM orders o
+      join articles a on a.id = o.article_id 
+      WHERE article_id = $1 AND o.canceled_at IS NULL
     `;
 
     const params: any[] = [itemId];
@@ -277,9 +279,10 @@ export async function getItemRentals(
 
     query += ` ORDER BY start_date`;
 
-    const result = await pool.query(query, params);
+    console.log("Executing query:", query, "with params:", params);
+    const {rows} = await pool.query(query, params);
 
-    return result.rows.map((row:any) => ({
+    return rows.map((row:any) => ({
       id: row.id,
       itemId: row.itemId,
       sizeId: row.sizeId,
@@ -336,12 +339,7 @@ export async function createRental(
 
     const sizeCheck = await pool.query(
       `
-      SELECT 1 
-      FROM article_sizes 
-      WHERE article_id = $1 
-        AND size_id = $2 
-        AND active = TRUE 
-        AND stock > 0
+         select 1 from articles where id = $1 and size_id = $2 AND active = TRUE  AND stock > 0 
       `,
       [data.itemId, data.sizeId]
     );
@@ -350,18 +348,28 @@ export async function createRental(
       return { error: "This size is not available for this item" as const };
     }
 
+    console.log([
+        data.itemId,
+        data.start,
+        data.end,
+        item.pricePerDay,
+        data.customer.phone,
+        data.customer.name,
+        data.customer.email,
+        numberDays,
+      ])
+      
     const result = await pool.query(
       `
       INSERT INTO orders 
-        (article_id, size_id, start_date, end_date, status_id, price_for_day, phone, full_name, email, number_days)
-      VALUES ($1, $2, $3, $4, 1, $5, $6, $7, $8, $9)
+        (article_id, status_id, start_date, end_date, price_for_day, phone, full_name, email, number_days)
+      VALUES ($1, 1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING 
         id::text, 
         TO_CHAR(created_at, 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') AS created_at
       `,
       [
         data.itemId,
-        data.sizeId,
         data.start,
         data.end,
         item.pricePerDay,
@@ -396,7 +404,7 @@ export async function createRental(
 
 export async function listRentals(): Promise<Rental[]> {
   try {
-    const result = await pool.query(
+    const {rows} = await pool.query(
       `
       SELECT 
         id::text,
@@ -414,7 +422,7 @@ export async function listRentals(): Promise<Rental[]> {
       `
     );
 
-    return result.rows.map((row:any) => ({
+    return rows.map((row:any) => ({
       id: row.id,
       itemId: row.itemId,
       sizeId: row.sizeId,

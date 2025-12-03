@@ -16,7 +16,7 @@ export default async function Page() {
   const csrf = await getOrCreateCsrfToken();
 
   const items = await listItems();
-  const rentals = listRentals();
+  const rentals = await listRentals();
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">

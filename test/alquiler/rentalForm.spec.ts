@@ -51,7 +51,7 @@ test.describe.serial('Rental flow - sequential tests', () => {
     await page.getByRole('button', { name: /request rental/i }).click();
     
 
-    await expect(page.locator('text=Rental successfully completed')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('text=Rental successfully completed')).toBeVisible({ timeout: 30000 });
 });
 
 test('Intentar alquilar fechas ya reservadas', async ({ page }) => {

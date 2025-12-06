@@ -29,17 +29,17 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
       <BackButton href="/" />
       <h1 className="text-2xl sm:text-3xl font-bold mt-4">Browse catalog</h1>
       <form method="GET" className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
-        <input name="q" defaultValue={q} placeholder="Search…" className="rounded-xl border px-3 py-2 text-sm" />
-        <select name="category" defaultValue={category} className="rounded-xl border px-3 py-2 text-sm">
-          <option value="">All categories</option>
-          <option value="dress">Dresses</option>
-          <option value="shoes">Shoes</option>
-          <option value="bag">Bags</option>
-          <option value="jacket">Jackets</option>
+        <input name="q" defaultValue={q} placeholder="Search…" className="rounded-xl border px-3 py-2 text-sm dark:bg-slate-800 dark:text-white dark:border-slate-700 dark:placeholder:text-slate-400" />
+        <select name="category" defaultValue={category} className="rounded-xl border px-3 py-2 text-sm dark:bg-slate-800 dark:text-white dark:border-slate-700">
+          <option value="" className="dark:bg-slate-800 dark:text-white">All categories</option>
+          <option value="dress" className="dark:bg-slate-800 dark:text-white">Dresses</option>
+          <option value="shoes" className="dark:bg-slate-800 dark:text-white">Shoes</option>
+          <option value="bag" className="dark:bg-slate-800 dark:text-white">Bags</option>
+          <option value="jacket" className="dark:bg-slate-800 dark:text-white">Jackets</option>
         </select>
-        <input name="size" defaultValue={size} placeholder="Size" className="rounded-xl border px-3 py-2 text-sm" />
-        <input name="color" defaultValue={color} placeholder="Color" className="rounded-xl border px-3 py-2 text-sm" />
-        <input name="style" defaultValue={style} placeholder="Style (e.g., cocktail)" className="rounded-xl border px-3 py-2 text-sm" />
+        <input name="size" defaultValue={size} placeholder="Size" className="rounded-xl border px-3 py-2 text-sm dark:bg-slate-800 dark:text-white dark:border-slate-700 dark:placeholder:text-slate-400" />
+        <input name="color" defaultValue={color} placeholder="Color" className="rounded-xl border px-3 py-2 text-sm dark:bg-slate-800 dark:text-white dark:border-slate-700 dark:placeholder:text-slate-400" />
+        <input name="style" defaultValue={style} placeholder="Style (e.g., cocktail)" className="rounded-xl border px-3 py-2 text-sm dark:bg-slate-800 dark:text-white dark:border-slate-700 dark:placeholder:text-slate-400" />
         <button className="rounded-xl bg-fuchsia-600 text-white px-4 py-2 text-sm">Search</button>
       </form>
 

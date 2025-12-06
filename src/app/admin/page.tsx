@@ -1,6 +1,7 @@
 import { isAdmin, getOrCreateCsrfToken } from "@/lib/CsrfSessionManagement";
 import { listItems, listRentals } from "@/lib/RentalManagementSystem";
 import { redirect } from "next/navigation";
+import BackButton from "../components/BackButton";
 
 type AdminItem = {
   id: number | string;
@@ -14,12 +15,13 @@ export default async function Page() {
   if (!isAdmin()) redirect("/admin/login");
   const csrf = await getOrCreateCsrfToken();
 
-  const items = listItems();
-  const rentals = listRentals();
+  const items = await listItems();
+  const rentals = await listRentals();
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
-      <div className="flex items-center justify-between">
+      <BackButton href="/" label="Volver al inicio" />
+      <div className="flex items-center justify-between mt-4">
         <h1 className="text-2xl font-bold">Admin dashboard</h1>
         <form action="/api/admin/logout" method="POST">
           <button className="text-sm rounded-lg border px-3 py-2">Sign out</button>

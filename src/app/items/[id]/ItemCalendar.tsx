@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-type Props = { itemId: number };
+type Props = { itemId: number; selectedSize?: string };
 
 type Range = { start: string; end: string };
 
@@ -10,15 +10,19 @@ function toISO(d: Date) {
   return d.toISOString().slice(0, 10);
 }
 
-export default function ItemCalendar({ itemId }: Props) {
+export default function ItemCalendar({ itemId, selectedSize }: Props) {
   const [busy, setBusy] = useState<Range[]>([]);
 
   useEffect(() => {
-    fetch(`/api/items/${itemId}/availability`)
+    const url = selectedSize 
+      ? `/api/items/${itemId}/availability?size=${selectedSize}`
+      : `/api/items/${itemId}/availability`;
+    
+    fetch(url)
       .then((r) => r.json())
       .then((data) => setBusy(data.rentals ?? []))
       .catch(() => setBusy([]));
-  }, [itemId]);
+  }, [itemId, selectedSize]);
 
   // Show next 30 days
   const today = new Date();

@@ -1,4 +1,3 @@
-version: '3.8'
 
 services:
   postgres:
@@ -10,9 +9,14 @@ services:
       POSTGRES_PASSWORD: admin123
       POSTGRES_DB: appVestidos
     ports:
-      - "5432:5432"
+      - "5434:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d appVestidos"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres_data:

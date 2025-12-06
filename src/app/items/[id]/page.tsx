@@ -1,33 +1,52 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import {getItem, getItemRentals} from "../../../../lib/RentalManagementSystem";
-import ItemCalendar from "./ItemCalendar";
+import {getItem, getAvailableSizes} from "../../../../lib/RentalManagementSystem";
+import ItemWithSizeSelector from "./ItemWithSizeSelector";
 import {getOrCreateCsrfToken} from "../../../../lib/CsrfSessionManagement";
 import { StaticImport } from "next/dist/shared/lib/get-img-props";
 import { Key } from "react";
+import BackButton from "../../components/BackButton";
 
-export default async function ItemDetail({params}: { params: { id: string } }) {
-    const id = Number(params.id);
-    const item = getItem(id);
+export default async function ItemDetail({params}: { params: Promise<{ id: string }> }) {
+    const { id: idStr } = await params;
+    const id = Number(idStr);
+    const item = await getItem(id);
     if (!item) return notFound();
 
     // Generate CSRF token; cookie will be set if missing
     const csrf = await getOrCreateCsrfToken();
 
-    const booked = await getItemRentals(id);
+    // Obtener los talles disponibles desde la base de datos
+    const availableSizes = await getAvailableSizes(id);
 
     return (
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <BackButton />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-4">
                 <div>
-                    <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800">
-                        <Image src={item.images[0]} alt={item.alt} fill className="object-cover" priority/>
+                    <div className="relative aspect-[3/4] rounded-2xl overflow-hidden">
+                        <Image 
+                            src={item.images[0]} 
+                            alt={item.alt} 
+                            fill 
+                            className="object-contain rounded-2xl" 
+                            priority
+                            quality={100}
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px"
+                        />
                     </div>
                     <div className="mt-4 grid grid-cols-3 gap-3">
                         {item.images.slice(1).map((src: Key | StaticImport | null | undefined) => (
                             <div key={`${src}-${item.id}`}
-                                 className="relative aspect-[3/4] rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800">
-                                <Image src={src as StaticImport} alt={item.alt} fill className="object-cover"/>
+                                 className="relative aspect-[3/4] rounded-xl overflow-hidden">
+                                <Image 
+                                    src={src as StaticImport} 
+                                    alt={item.alt} 
+                                    fill 
+                                    className="object-contain rounded-xl"
+                                    quality={95}
+                                    sizes="(max-width: 768px) 33vw, (max-width: 1200px) 20vw, 200px"
+                                />
               </div>
             ))}
           </div>
@@ -38,50 +57,9 @@ export default async function ItemDetail({params}: { params: { id: string } }) {
           <p className="mt-1 text-slate-600 dark:text-slate-400 capitalize">{item.category}</p>
           <p className="mt-4">{item.description}</p>
           <p className="mt-4 font-semibold">From ${item.pricePerDay}/day</p>
-          <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">Sizes: {item.sizes.join(", ")}</p>
           <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">Color: {item.color}{item.style ? ` • Style: ${item.style}` : ""}</p>
 
-          <div className="mt-8">
-            <h2 className="font-semibold mb-3">Availability</h2>
-            <ItemCalendar itemId={id} />
-            {booked.length > 0 && (
-              <p className="mt-2 text-xs text-slate-500">Dates marked are already booked.</p>
-            )}
-          </div>
-
-          <div className="mt-10">
-            <h2 className="font-semibold mb-3">Schedule a rental</h2>
-            <form action="/api/rentals" method="POST" className="grid grid-cols-1 sm:grid-cols-2 gap-3 rounded-2xl border p-4">
-              <input type="hidden" name="itemId" value={id} />
-              <input type="hidden" name="csrf" value={csrf} />
-              <div className="sm:col-span-2">
-                <label className="sr-only" htmlFor="name">Full name</label>
-                <input id="name" name="name" required placeholder="Full name" className="w-full rounded-xl border px-4 py-3 text-sm" />
-              </div>
-              <div>
-                <label className="sr-only" htmlFor="email">Email</label>
-                <input id="email" name="email" type="email" required placeholder="Email" className="w-full rounded-xl border px-4 py-3 text-sm" />
-              </div>
-              <div>
-                <label className="sr-only" htmlFor="phone">Phone</label>
-                <input id="phone" name="phone" required placeholder="Phone" className="w-full rounded-xl border px-4 py-3 text-sm" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1.5" htmlFor="start">Fecha de inicio</label>
-                <input id="start" name="start" type="date" required className="w-full rounded-xl border px-4 py-3 text-sm dark:[color-scheme:dark]" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1.5" htmlFor="end">Fecha de fin</label>
-                <input id="end" name="end" type="date" required className="w-full rounded-xl border px-4 py-3 text-sm dark:[color-scheme:dark]" />
-              </div>
-              <div className="sm:col-span-2">
-                <button className="w-full sm:w-auto rounded-xl bg-fuchsia-600 text-white px-6 py-3 text-sm font-semibold hover:bg-fuchsia-500">
-                  Request rental
-                </button>
-              </div>
-            </form>
-            <p className="mt-2 text-xs text-slate-500">No account required. We’ll confirm availability via email.</p>
-          </div>
+          <ItemWithSizeSelector itemId={id} availableSizes={availableSizes} csrf={csrf} />
         </div>
       </div>
     </div>

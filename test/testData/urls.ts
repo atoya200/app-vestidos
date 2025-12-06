@@ -1,9 +1,13 @@
+const BASE = process.env.BASE_URL || 'http://localhost:3000';
+
 export const appUrls = {
-  home: process.env.BASE_URL || 'http://localhost:3000',
-  adminLogin: (process.env.BASE_URL || 'http://localhost:3000') + '/admin/login',
-  contact: (process.env.BASE_URL || 'http://localhost:3000') + '/contact',
-  privacy: (process.env.BASE_URL || 'http://localhost:3000') + '/privacy',
-  terms: (process.env.BASE_URL || 'http://localhost:3000') + '/terms',
-  faq: (process.env.BASE_URL || 'http://localhost:3000') + '/faq',
-  search: (process.env.BASE_URL || 'http://localhost:3000') + '/search',
+  home: BASE,
+  adminLogin: BASE + '/admin/login',
+  contact: BASE + '/contact',
+  privacy: BASE + '/privacy',
+  terms: BASE + '/terms',
+  faq: BASE + '/faq',
+  search: BASE + '/search',
+  // Función para obtener la URL de un item específico
+  item: (id: number) => `${BASE}/items/${id}`,
 };

@@ -4,7 +4,7 @@ CREATE TABLE USERS (
     password_hash VARCHAR(255) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP NULLABLE
+    deleted_at TIMESTAMP
 );
 
 CREATE TABLE ARTICLE_TYPES (
@@ -16,7 +16,7 @@ CREATE TABLE ARTICLE_TYPES (
 CREATE TABLE SIZES (
     id SERIAL PRIMARY KEY,
     size_label VARCHAR(10) NOT NULL,
-    description VARCHAR(100)
+    description VARCHAR(100),
     active BOOLEAN DEFAULT TRUE
 );
 
@@ -40,9 +40,9 @@ CREATE TABLE ARTICLES(
     image_url VARCHAR(255),
     description TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    modifyed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    user_modifyed_id INT REFERENCES USERS(id),
-    deleted_at TIMESTAMP NULLABLE,
+    modified_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    user_modified_id INT REFERENCES USERS(id),
+    deleted_at TIMESTAMP,
     user_delete_id INT REFERENCES USERS(id),
     active BOOLEAN DEFAULT TRUE
 );
@@ -63,10 +63,10 @@ CREATE TABLE ORDERS (
     start_date TIMESTAMP NOT NULL,
     end_date TIMESTAMP NOT NULL,
     status_id INT REFERENCES ORDER_STATUSES(id),
-    canceled_by_user_id INT REFERENCES USERS(id) NULLABLE,
+    canceled_by_user_id INT REFERENCES USERS(id),
     price_for_day DECIMAL(10, 2) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    canceled_at TIMESTAMP NULLABLE,
+    canceled_at TIMESTAMP,
     phone VARCHAR(20) NOT NULL,
     full_name VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL,

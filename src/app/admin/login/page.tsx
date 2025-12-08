@@ -1,7 +1,6 @@
 // app/admin/login/page.tsx
 import { getOrCreateCsrfToken } from "@/lib/CsrfSessionManagement";
 import LoginForm from "./LoginForm";
-import Header from "../../components/PublicHeader";
 
 export default async function AdminLoginPage() {
   const csrf = await getOrCreateCsrfToken();

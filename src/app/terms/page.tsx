@@ -1,9 +1,11 @@
 import Link from "next/link";
+import BackButton from "../components/BackButton";
 
 export default function TermsPage() {
   return (
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-10">
-        <h1 className="text-2xl sm:text-3xl font-bold">Términos y Condiciones</h1>
+        <BackButton />
+        <h1 className="text-2xl sm:text-3xl font-bold mt-4">Términos y Condiciones</h1>
         
         <p className="mt-4 text-slate-600 dark:text-slate-400 leading-relaxed">
           Última actualización: 3 de noviembre de 2025

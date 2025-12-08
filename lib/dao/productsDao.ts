@@ -171,7 +171,7 @@ export async function getAvailableSizesForArticle(itemId: number) {
   
   const result = await pool.query(
     `
-    SELECT DISTINCT s.size_label 
+    SELECT DISTINCT s.size_label, s.id
     FROM articles a
     JOIN sizes s ON a.size_id = s.id
     WHERE a.style = $1 

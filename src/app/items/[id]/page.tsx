@@ -2,6 +2,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getArticleById, getAvailableSizesForArticle } from "../../../../lib/dao/productsDao";
 import ItemWithSizeSelector from "./ItemWithSizeSelector";
+import ImageGallery from "./ImageGallery";
 import {getOrCreateCsrfToken} from "../../../../lib/CsrfSessionManagement";
 import { StaticImport } from "next/dist/shared/lib/get-img-props";
 import { Key } from "react";
@@ -24,33 +25,8 @@ export default async function ItemDetail({params}: { params: Promise<{ id: strin
             <BackButton />
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-4">
                 <div>
-                    <div className="relative aspect-[3/4] rounded-2xl overflow-hidden">
-                        <Image 
-                            src={item.images[0]} 
-                            alt={item.alt} 
-                            fill 
-                            className="object-contain rounded-2xl" 
-                            priority
-                            quality={100}
-                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px"
-                        />
-                    </div>
-                    <div className="mt-4 grid grid-cols-3 gap-3">
-                        {item.images.slice(1).map((src: Key | StaticImport | null | undefined) => (
-                            <div key={`${src}-${item.id}`}
-                                 className="relative aspect-[3/4] rounded-xl overflow-hidden">
-                                <Image 
-                                    src={src as StaticImport} 
-                                    alt={item.alt} 
-                                    fill 
-                                    className="object-contain rounded-xl"
-                                    quality={95}
-                                    sizes="(max-width: 768px) 33vw, (max-width: 1200px) 20vw, 200px"
-                                />
-              </div>
-            ))}
-          </div>
-        </div>
+                    <ImageGallery images={item.images} alt={item.alt} />
+                </div>
 
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold">{item.name}</h1>

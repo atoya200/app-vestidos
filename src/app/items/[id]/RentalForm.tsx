@@ -21,7 +21,8 @@ export default function RentalForm({ itemId, csrf, selectedSize }: RentalFormPro
     const formData = new FormData(form);
     const startDate = formData.get('start') as string;
     const endDate = formData.get('end') as string;
-    const today = new Date().toISOString().split('T')[0];
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
     // Validación de fechas pasadas
     if (startDate < today) {
@@ -50,13 +51,19 @@ export default function RentalForm({ itemId, csrf, selectedSize }: RentalFormPro
       });
 
       if (!response.ok) {
-        const data = await response.json();
-        // Mensajes de error específicos del servidor
-        if (data.error === 'Item not available for selected dates') {
-          setMessage({ type: 'error', text: 'Item is already rented for the selected dates' });
-        } else {
-          setMessage({ type: 'error', text: data.error || 'Error creating rental' });
+        let errorMessage = 'Unable to complete rental';
+        try {
+          const data = await response.json();
+          // Mensajes de error específicos del servidor
+          if (data.error === 'Item not available for selected dates') {
+            errorMessage = 'Item is already rented for the selected dates';
+          } else {
+            errorMessage = 'Unable to complete rental';
+          }
+        } catch (parseError) {
+          errorMessage = 'Unable to complete rental';
         }
+        setMessage({ type: 'error', text: errorMessage });
         return;
       }
 
@@ -68,7 +75,7 @@ export default function RentalForm({ itemId, csrf, selectedSize }: RentalFormPro
       window.dispatchEvent(new CustomEvent('rentalCreated'));
     } catch (error) {
       console.error('Error en la petición:', error);
-      setMessage({ type: 'error', text: 'Server connection error' });
+      setMessage({ type: 'error', text: 'Unable to complete rental' });
     } finally {
       setIsSubmitting(false);
     }

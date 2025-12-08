@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
-import {listItems, type Category} from "../../../lib/RentalManagementSystem";
+import { getArticlesByFilters } from "../../../lib/dao/productsDao";
+import { Category } from "../../../lib/types";
 import BackButton from "../components/BackButton";
 import {getColors} from "../../../lib/dao/colorDao";
 
@@ -17,9 +18,9 @@ type SearchParams = {
 export default async function Page({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const params = await searchParams;
   const { q = "", category = "", size = "", color = "", style = "" } = params;
-  const items = await listItems({
+  const items = await getArticlesByFilters({
     q,
-    category: category || undefined,
+    category: (category as Category) || undefined,
     size: size || undefined,
     color: color || undefined,
     style: style || undefined,

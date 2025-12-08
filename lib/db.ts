@@ -6,4 +6,4 @@ const pool = new Pool({
   ssl: false
 });
 
-export default pool; // ✅ ahora podés usar default import
+export default pool;

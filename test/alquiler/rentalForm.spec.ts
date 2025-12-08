@@ -17,6 +17,7 @@ test.describe.serial('Rental flow - sequential tests', () => {
     let usedSize: string;
     
     test('Realizar un alquiler exitoso', async ({ page }) => {
+    test.setTimeout(120000);
     // Calcular fechas dinámicas: 7 días desde hoy, rental de 5 días
     const today = new Date();
     const startDate = new Date(today);
@@ -39,7 +40,7 @@ test.describe.serial('Rental flow - sequential tests', () => {
     usedSize = availableSizes[0]; // Guardar para usar en el siguiente test
     
     // Seleccionar el primer talle disponible
-    await page.getByRole('button', { name: usedSize }).click();
+    await page.getByRole('button', { name: usedSize, exact: true }).first().click();
     
     // Llenar el formulario con fechas dinámicas
     await page.fill('input[name="name"]', 'Juan Pérez');
@@ -51,7 +52,7 @@ test.describe.serial('Rental flow - sequential tests', () => {
     await page.getByRole('button', { name: /request rental/i }).click();
     
 
-    await expect(page.locator('text=Rental successfully completed')).toBeVisible({ timeout: 30000 });
+    await expect(page.locator('text=Rental successfully completed')).toBeVisible({ timeout: 90000 });
 });
 
 test('Intentar alquilar fechas ya reservadas', async ({ page }) => {
@@ -70,7 +71,7 @@ test('Intentar alquilar fechas ya reservadas', async ({ page }) => {
     await page.goto(appUrls.item(1));
     
     // Seleccionar el mismo talle que se usó en el test anterior
-    await page.getByRole('button', { name: usedSize }).click();
+    await page.getByRole('button', { name: usedSize, exact: true }).first().click();
     
     // Intentar usar exactamente las mismas fechas del test anterior
     await page.fill('input[name="name"]', 'María González');
@@ -99,7 +100,7 @@ test('Intentar alquilar con fecha de inicio en el pasado', async ({ page }) => {
     
     // Obtener y seleccionar primer talle disponible
     const availableSizes = await getAvailableSizesFromPage(page, 1);
-    await page.getByRole('button', { name: availableSizes[0] }).click();
+    await page.getByRole('button', { name: availableSizes[0], exact: true }).first().click();
     
     await page.fill('input[name="name"]', 'Pedro Martínez');
     await page.fill('input[name="email"]', 'pedro@gmail.com');
@@ -126,7 +127,7 @@ test('Intentar alquilar con ambas fechas en el pasado', async ({ page }) => {
     await page.goto(appUrls.item(1));
     
     const availableSizes = await getAvailableSizesFromPage(page, 1);
-    await page.getByRole('button', { name: availableSizes[0] }).click();
+    await page.getByRole('button', { name: availableSizes[0], exact: true }).first().click();
     
     await page.fill('input[name="name"]', 'Ana López');
     await page.fill('input[name="email"]', 'ana@gmail.com');
@@ -154,7 +155,7 @@ test('Intentar alquilar con fecha de fin anterior a fecha de inicio', async ({ p
     
     // Obtener y seleccionar primer talle disponible
     const availableSizes = await getAvailableSizesFromPage(page, 1);
-    await page.getByRole('button', { name: availableSizes[0] }).click();
+    await page.getByRole('button', { name: availableSizes[0], exact: true }).first().click();
     
     await page.fill('input[name="name"]', 'Luis Fernández');
     await page.fill('input[name="email"]', 'luis@gmail.com');

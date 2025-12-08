@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import {listItems, type Category} from "../../../lib/RentalManagementSystem";
 import BackButton from "../components/BackButton";
+import {getColors} from "../../../lib/dao/colorDao";
 
 type SearchParams = {
   q?: string; 
@@ -23,6 +24,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
     color: color || undefined,
     style: style || undefined,
   });
+  const colors = await getColors();
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
@@ -38,7 +40,12 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
           <option value="jacket" className="dark:bg-slate-800 dark:text-white">Jackets</option>
         </select>
         <input name="size" defaultValue={size} placeholder="Size" className="rounded-xl border px-3 py-2 text-sm dark:bg-slate-800 dark:text-white dark:border-slate-700 dark:placeholder:text-slate-400" />
-        <input name="color" defaultValue={color} placeholder="Color" className="rounded-xl border px-3 py-2 text-sm dark:bg-slate-800 dark:text-white dark:border-slate-700 dark:placeholder:text-slate-400" />
+        <select name="color" defaultValue={color} className="rounded-xl border px-3 py-2 text-sm dark:bg-slate-800 dark:text-white dark:border-slate-700">
+          <option value="" className="dark:bg-slate-800 dark:text-white">All colors</option>
+          {colors.map((col) => (
+            <option key={col.id} value={col.color_name} className="dark:bg-slate-800 dark:text-white">{col.color_name}</option>
+          ))}
+        </select>
         <input name="style" defaultValue={style} placeholder="Style (e.g., cocktail)" className="rounded-xl border px-3 py-2 text-sm dark:bg-slate-800 dark:text-white dark:border-slate-700 dark:placeholder:text-slate-400" />
         <button className="rounded-xl bg-fuchsia-600 text-white px-4 py-2 text-sm">Search</button>
       </form>

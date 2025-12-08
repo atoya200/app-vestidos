@@ -1,5 +1,6 @@
 import { isAdmin, getOrCreateCsrfToken } from "@/lib/CsrfSessionManagement";
-import { listItems, listRentals } from "@/lib/RentalManagementSystem";
+import { getAllArticles } from "@/lib/dao/productsDao";
+import { getAllOrders } from "@/lib/dao/rentalsDao";
 import { redirect } from "next/navigation";
 
 type AdminItem = {
@@ -14,8 +15,8 @@ export default async function Page() {
   if (!isAdmin()) redirect("/admin/login");
   const csrf = await getOrCreateCsrfToken();
 
-  const items = listItems();
-  const rentals = listRentals();
+  const items = await getAllArticles();
+  const rentals = await getAllOrders();
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">

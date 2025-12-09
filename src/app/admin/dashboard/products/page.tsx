@@ -20,6 +20,7 @@ export default async function ProductsPage() {
 
   const data = await fetchData();
 
+  console.log("ProductsPage fetched data:", data);
   return (
     <ProductsList
       products={data.products}

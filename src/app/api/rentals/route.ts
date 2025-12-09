@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import {createRental, getItem} from "../../../../lib/RentalManagementSystem";
 import {verifyCsrfToken} from "../../../../lib/CsrfSessionManagement";
+import { getAllOrders } from "@/lib/dao/rentalsDao";
 import pool from "../../../../lib/db";
 
 function normalizeDate(s: string | null) {
@@ -51,4 +52,11 @@ export async function POST(req: Request) {
   if (error) return NextResponse.json({ error }, { status: 409 });
 
   return NextResponse.json({ success: true, rental });
+}
+
+
+
+export async function GET() {
+  const rentals = await getAllOrders();
+  return NextResponse.json(rentals);
 }

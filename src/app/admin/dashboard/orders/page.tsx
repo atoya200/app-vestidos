@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import OrdersList from "./OrdersList";
 
 async function fetchOrders() {
-  const res = await fetch(`${process.env.NEXT_URL_API}/api/admin/orders`, {
+  const res = await fetch(`${process.env.NEXT_URL_API}/api/rentals`, {
     cache: "no-store"
   });
   return res.json();

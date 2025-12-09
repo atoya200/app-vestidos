@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { pool } from "../../../../../../../lib/db";
+import pool from "../../../../../../../lib/db";
 
 export async function POST(req: Request, { params }: { params: { id: string } }) {
   const orderId = Number(params.id);

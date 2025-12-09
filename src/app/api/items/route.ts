@@ -29,7 +29,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ items });
     }
 
-    // Fallback: query grouped dresses directly if helper returns empty
+
     const result = await pool.query(
       `
       SELECT DISTINCT ON (a.style, a.color_id)

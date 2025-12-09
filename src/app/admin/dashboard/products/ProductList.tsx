@@ -9,6 +9,8 @@ export default function ProductsList({ products, colors, sizes, types }: any) {
   const [editingProduct, setEditingProduct] = useState<any | null>(null);
   const [items, setItems] = useState(products); // 🔥 manejamos los items acá
 
+  console.log("ProductsList render with items:", items);
+
   // 🔥 REFRESCAR SOLO UN PRODUCTO
   async function refreshItem(id: number) {
     const res = await fetch(`/api/items/${id}`, { cache: "no-store" });

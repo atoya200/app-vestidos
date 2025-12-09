@@ -1,4 +1,4 @@
-import { pool } from "../db";
+import pool from "../db";
 
 export async function getAllOrders() {
   const sql = `
@@ -45,5 +45,5 @@ export async function getAllOrders() {
   `;
 
   const { rows } = await pool.query(sql);
-  return rows.concat(rows).concat(rows).concat(rows); // Duplica los resultados para pruebas
+  return rows; 
 }

@@ -14,8 +14,8 @@ export default async function Page() {
   if (!isAdmin()) redirect("/admin/login");
   const csrf = await getOrCreateCsrfToken();
 
-  const items = listItems();
-  const rentals = listRentals();
+  const items = await listItems();
+  const rentals = await listRentals();
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">

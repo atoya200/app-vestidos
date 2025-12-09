@@ -8,6 +8,18 @@ export default function Header() {
         <Link href="/" className="font-extrabold text-xl tracking-tight">
           GlamRent
         </Link>
+
+        <nav className="hidden md:flex items-center gap-8 text-sm">
+          <Link href="/search" className="hover:text-fuchsia-600">Browse</Link>
+          <Link href="/#how" className="hover:text-fuchsia-600">How it works</Link>
+          <Link href="/#featured" className="hover:text-fuchsia-600">Featured</Link>
+          <Link href="/faq" className="hover:text-fuchsia-600">FAQ</Link>
+          <Link href="/terms" className="hover:text-fuchsia-600">Terms</Link>
+        </nav>
+
+        <div className="flex items-center gap-3">
+            <Link href="/admin/login" className="text-sm hover:text-fuchsia-600">Admin</Link>
+        </div>
       </div>
     </header>
   );

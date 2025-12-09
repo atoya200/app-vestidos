@@ -3,9 +3,11 @@ import { useEffect } from "react";
 
 export default function ImageModal({
   url,
+  alt,
   onClose,
 }: {
   url: string;
+  alt?: string;
   onClose: () => void;
 }) {
   useEffect(() => {
@@ -34,6 +36,7 @@ export default function ImageModal({
       >
         <img
           src={url}
+          alt={alt || "Zoomed image"}
           className="rounded-lg max-h-[80vh] object-contain"
         />
 

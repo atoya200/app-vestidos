@@ -1,10 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import Footer from "./components/Footer";
-import { listItems } from "../../lib/RentalManagementSystem";
+import { getAllArticles } from "../../lib/dao/productsDao";
 
 export default async function Home() {
-  const allItems = await listItems();
+  const allItems = await getAllArticles();
   const featured = allItems.slice(0, 4).map(item => ({
     id: item.id,
     name: item.name,

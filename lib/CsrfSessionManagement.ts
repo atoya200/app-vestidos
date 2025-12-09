@@ -7,8 +7,6 @@ export async function getOrCreateCsrfToken() {
     const c = await cookies();
     let token = c.get(CSRF_COOKIE)?.value;
     if (!token) {
-        // In RSC render we cannot write cookies; generate a token so the form has one.
-        // The actual cookie will be ensured via middleware.
         token = crypto.randomUUID();
     }
     return token;

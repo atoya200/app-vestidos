@@ -1,7 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
-import {listItems, type Category} from "../../../lib/RentalManagementSystem";
+import { getArticlesByFilters } from "../../../lib/dao/productsDao";
+import { Category } from "../../../lib/types";
 import BackButton from "../components/BackButton";
+import {getColors} from "../../../lib/dao/colorDao";
 
 type SearchParams = {
   q?: string; 
@@ -16,31 +18,37 @@ type SearchParams = {
 export default async function Page({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const params = await searchParams;
   const { q = "", category = "", size = "", color = "", style = "" } = params;
-  const items = await listItems({
+  const items = await getArticlesByFilters({
     q,
-    category: category || undefined,
+    category: (category as Category) || undefined,
     size: size || undefined,
     color: color || undefined,
     style: style || undefined,
   });
+  const colors = await getColors();
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
       <BackButton href="/" />
       <h1 className="text-2xl sm:text-3xl font-bold mt-4">Browse catalog</h1>
       <form method="GET" className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
-        <input name="q" defaultValue={q} placeholder="Search…" className="rounded-xl border px-3 py-2 text-sm dark:bg-slate-800 dark:text-white dark:border-slate-700 dark:placeholder:text-slate-400" />
-        <select name="category" defaultValue={category} className="rounded-xl border px-3 py-2 text-sm dark:bg-slate-800 dark:text-white dark:border-slate-700">
+        <input name="q" defaultValue={q} placeholder="Search…" className="rounded-xl border px-3 py-2 text-sm dark:bg-slate-800 dark:text-white dark:border-slate-700 dark:placeholder:text-slate-400" suppressHydrationWarning />
+        <select name="category" defaultValue={category} className="rounded-xl border px-3 py-2 text-sm dark:bg-slate-800 dark:text-white dark:border-slate-700" suppressHydrationWarning>
           <option value="" className="dark:bg-slate-800 dark:text-white">All categories</option>
           <option value="dress" className="dark:bg-slate-800 dark:text-white">Dresses</option>
           <option value="shoes" className="dark:bg-slate-800 dark:text-white">Shoes</option>
           <option value="bag" className="dark:bg-slate-800 dark:text-white">Bags</option>
           <option value="jacket" className="dark:bg-slate-800 dark:text-white">Jackets</option>
         </select>
-        <input name="size" defaultValue={size} placeholder="Size" className="rounded-xl border px-3 py-2 text-sm dark:bg-slate-800 dark:text-white dark:border-slate-700 dark:placeholder:text-slate-400" />
-        <input name="color" defaultValue={color} placeholder="Color" className="rounded-xl border px-3 py-2 text-sm dark:bg-slate-800 dark:text-white dark:border-slate-700 dark:placeholder:text-slate-400" />
-        <input name="style" defaultValue={style} placeholder="Style (e.g., cocktail)" className="rounded-xl border px-3 py-2 text-sm dark:bg-slate-800 dark:text-white dark:border-slate-700 dark:placeholder:text-slate-400" />
-        <button className="rounded-xl bg-fuchsia-600 text-white px-4 py-2 text-sm">Search</button>
+        <input name="size" defaultValue={size} placeholder="Size" className="rounded-xl border px-3 py-2 text-sm dark:bg-slate-800 dark:text-white dark:border-slate-700 dark:placeholder:text-slate-400" suppressHydrationWarning />
+        <select name="color" defaultValue={color} className="rounded-xl border px-3 py-2 text-sm dark:bg-slate-800 dark:text-white dark:border-slate-700" suppressHydrationWarning>
+          <option value="" className="dark:bg-slate-800 dark:text-white">All colors</option>
+          {colors.map((col) => (
+            <option key={col.id} value={col.color_name} className="dark:bg-slate-800 dark:text-white">{col.color_name}</option>
+          ))}
+        </select>
+        <input name="style" defaultValue={style} placeholder="Style (e.g., cocktail)" className="rounded-xl border px-3 py-2 text-sm dark:bg-slate-800 dark:text-white dark:border-slate-700 dark:placeholder:text-slate-400" suppressHydrationWarning />
+        <button className="rounded-xl bg-fuchsia-600 text-white px-4 py-2 text-sm" suppressHydrationWarning>Search</button>
       </form>
 
       <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

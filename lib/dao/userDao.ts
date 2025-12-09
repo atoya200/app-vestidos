@@ -1,10 +1,9 @@
-import pool from "../db";
+import  pool  from "../db";
 
 export interface User {
   id: number;
   username: string;
   password_hash: string;
-  // otros campos que tengas en la tabla
 }
 
 export async function getUserByUsername(username: string): Promise<User | null> {

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { listItems, getAvailableSizes } from "../../../../lib/RentalManagementSystem";
-import pool from "../../../../lib/db";
+import { getArticlesByFilters, getAvailableSizesForArticle } from "../../../../lib/dao/productsDao";
+import { Category } from "../../../../lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -8,66 +8,36 @@ export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const q = searchParams.get("q") || undefined;
-    const category = (searchParams.get("category") as any) || undefined;
+    const category = (searchParams.get("category") as Category) || undefined;
     const size = searchParams.get("size") || undefined;
     const color = searchParams.get("color") || undefined;
     const style = searchParams.get("style") || undefined;
 
-    const items = (await listItems({ q, category, size, color, style })).map((i) => ({
-      id: i.id,
-      name: i.name,
-      category: i.category,
-      pricePerDay: i.pricePerDay,
-      sizes: i.sizes,
-      color: i.color,
-      style: i.style,
-      image: i.images[0],
-      alt: i.alt,
-    }));
+    const articles = await getArticlesByFilters({ q, category, color, style });
 
-    if (items.length > 0) {
-      return NextResponse.json({ items });
-    }
-
-
-    const result = await pool.query(
-      `
-      SELECT DISTINCT ON (a.style, a.color_id)
-        MIN(a.id) as id,
-        a.style AS name,
-        at.type_name AS category,
-        a.price_for_day AS pricePerDay,
-        c.color_name AS color,
-        a.style,
-        a.description,
-        a.image_url
-      FROM articles a
-      JOIN article_types at ON a.article_type_id = at.id
-      JOIN colors c ON a.color_id = c.id
-      WHERE a.active = TRUE
-      GROUP BY a.style, a.color_id, at.type_name, a.price_for_day, c.color_name, a.description, a.image_url
-      ORDER BY a.style, a.color_id
-      `
-    );
-
-    const fallbackItems = await Promise.all(
-      result.rows.map(async (row) => {
-        const sizes = await getAvailableSizes(row.id);
+    const items = await Promise.all(
+      articles.map(async (article: any) => {
+        const sizes = await getAvailableSizesForArticle(article.id);
+        
         return {
-          id: row.id,
-          name: row.name,
-          category: row.category,
-          pricePerDay: Number(row.priceperday ?? row.pricePerDay),
+          id: article.id,
+          name: article.name,
+          category: article.category,
+          pricePerDay: parseFloat(article.pricePerDay),
           sizes,
-          color: row.color,
-          style: row.style,
-          image: row.image_url || `/images/dresses/${row.id}.jpeg`,
-          alt: `${row.name} - ${row.color}`,
+          color: article.color,
+          style: article.style,
+          image: article.image_url || `/images/dresses/${article.id}.jpeg`,
+          alt: `${article.name} - ${article.color}`,
         };
       })
     );
 
-    return NextResponse.json({ items: fallbackItems });
+    const filteredItems = size 
+      ? items.filter(item => item.sizes.includes(size))
+      : items;
+
+    return NextResponse.json({ items: filteredItems });
   } catch (error) {
     console.error("Items API error:", error);
     return NextResponse.json({ items: [], error: "Failed to load items" }, { status: 500 });

@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import {getItem, getAvailableSizes} from "../../../../lib/RentalManagementSystem";
+import { getArticleById, getAvailableSizesForArticle } from "../../../../lib/dao/productsDao";
 import ItemWithSizeSelector from "./ItemWithSizeSelector";
 import {getOrCreateCsrfToken} from "../../../../lib/CsrfSessionManagement";
 import { StaticImport } from "next/dist/shared/lib/get-img-props";
@@ -10,14 +10,14 @@ import BackButton from "../../components/BackButton";
 export default async function ItemDetail({params}: { params: Promise<{ id: string }> }) {
     const { id: idStr } = await params;
     const id = Number(idStr);
-    const item = await getItem(id);
+    const item = await getArticleById(id);
     if (!item) return notFound();
 
     // Generate CSRF token; cookie will be set if missing
     const csrf = await getOrCreateCsrfToken();
 
     // Obtener los talles disponibles desde la base de datos
-    const availableSizes = await getAvailableSizes(id);
+    const availableSizes = await getAvailableSizesForArticle(id);
 
     return (
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">

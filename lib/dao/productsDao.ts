@@ -232,7 +232,8 @@ export async function getProductsForDashboard() {
     GROUP BY
       a.id, a.article_type_id, t.type_name, a.size_id, s.size_label, a.color_id, c.color_name,
       a."style", a.price_for_day, a.stock, a.image_url, a.description, a.created_at,
-      modified_at, a.deleted_at, a.user_modified_id, a.user_delete_id, a.active;
+      modified_at, a.deleted_at, a.user_modified_id, a.user_delete_id, a.active
+    ORDER BY A.ID DESC;
   `;
 
   const { rows } = await pool.query(sql);

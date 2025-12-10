@@ -2,15 +2,18 @@
 import { useState } from "react";
 import ImageModal from "../../../components/ImagenModal";
 import EditProductModal from "./EditProductModal";
+import AddProductModal from "./AddProduct";
 
 export default function ProductsList({ products, colors, sizes, types, csrf }: any) {
   const [modalImg, setModalImg] = useState<string | null>(null);
   const [editingProduct, setEditingProduct] = useState<any | null>(null);
+  const [addProducto, setAddProduct] = useState<any | null>(null);
   const [items, setItems] = useState(products);
 
   async function refreshItem(id: number) {
-    const res = await fetch(`/api/items/${id}`, { cache: "no-store" ,
-      headers: { "x-csrf-token": csrf } 
+    const res = await fetch(`/api/items/${id}`, {
+      cache: "no-store",
+      headers: { "x-csrf-token": csrf }
     });
     const updated = await res.json();
 
@@ -22,7 +25,7 @@ export default function ProductsList({ products, colors, sizes, types, csrf }: a
   async function deleteProduct(id: number) {
     const res = await fetch(`/api/items/${id}`, {
       method: "DELETE",
-      headers: { "x-csrf-token": csrf } 
+      headers: { "x-csrf-token": csrf }
     });
 
     if (!res.ok) {
@@ -36,7 +39,7 @@ export default function ProductsList({ products, colors, sizes, types, csrf }: a
   async function reactiveProduct(id: number) {
     const res = await fetch(`/api/items/${id}`, {
       method: "PATCH",
-      headers: { "x-csrf-token": csrf } 
+      headers: { "x-csrf-token": csrf }
     });
 
     if (!res.ok) {
@@ -48,6 +51,12 @@ export default function ProductsList({ products, colors, sizes, types, csrf }: a
     }
   }
 
+  async function refreshList() {
+    const res = await fetch("/api/items/dashboard", { cache: "no-store" });
+    const data = await res.json();
+    setItems(data);
+  }
+
   return (
     <div className="max-heigth=[60vh]">
       <h1
@@ -57,7 +66,15 @@ export default function ProductsList({ products, colors, sizes, types, csrf }: a
           textAlign: "center",
           marginBottom: "20px",
         }}
-      > Productos </h1>
+      >Productos</h1>
+      <button
+        className="px-3 py-1 rounded-md text-white bg-blue-600 hover:bg-blue-700 transition"
+        onClick={() => {
+          setAddProduct(true);
+        }}
+      >
+        Agregar producto
+      </button>
       <div className="mt-6 overflow-y-auto max-h-[70vh]">
         <table className="min-w-full border rounded-lg shadow-md bg-white text-slate-900
           dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700">
@@ -161,6 +178,18 @@ export default function ProductsList({ products, colors, sizes, types, csrf }: a
             types={types}
             onUpdated={refreshItem}
             onClose={() => setEditingProduct(null)}
+            csrf={csrf}
+          />
+        )}
+
+
+        {addProducto && (
+          <AddProductModal
+            onClose={() => setAddProduct(null)}
+            colors={colors}
+            onCreated={() => refreshList()}
+            sizes={sizes}
+            types={types}
             csrf={csrf}
           />
         )}

@@ -162,9 +162,7 @@ export default function OrdersList({ orders, csrf }: { orders: any[], csrf : str
                 <td
                   colSpan={11}
                   className="text-center p-6 text-slate-500 dark:text-slate-400"
-                >
-                  No hay órdenes registradas.
-                </td>
+                >No hay órdenes registradas.</td>
               </tr>
             )}
           </tbody>

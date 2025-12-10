@@ -8,7 +8,6 @@ export async function getOrCreateCsrfToken() {
     const c = await cookies();
     let token = c.get(SESSION_COOKIE)?.value;
     if (!token) {
-        console.log("Creating new CSRF token");
         token = crypto.randomUUID();
     }
     return token;
@@ -24,14 +23,12 @@ export async function verifyCsrfToken(
     
     if (!csrfCookie) return false;
     
-    console.log("Verifying CSRF token,1231231213 cookie:", csrfCookie, "formToken:", formToken);
     if (formToken) {
         return csrfCookie === formToken;
     }
 
     if (headers) {
         const csrfHeader = headers.get("x-csrf-token");
-        console.log("Verifying CSRF token from header:", csrfHeader);
         if (!csrfHeader) return false;
         return csrfCookie === csrfHeader;
     }
@@ -60,10 +57,6 @@ export async function clearAdminSession() {
 
 export async function isAdmin() {
     const c = (await cookies()).get(SESSION_COOKIE);
-
-    console.log("isAdmin check cookie:", c);
-    console.log("isAdmin boolean:", !(c == undefined || c?.value == null || c?.value === ""));
-
     return !(c == undefined || c?.value == null || c?.value === "");
 }
 

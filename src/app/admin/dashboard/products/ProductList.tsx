@@ -52,7 +52,6 @@ export default function ProductsList({ products, colors, sizes, types, csrf }: a
   }
 
   async function refreshList() {
-    console.log("Refrescando lista...");
     const res = await fetch("/api/items/dashboard", { cache: "no-store" });
     const data = await res.json();
     setItems(data);
@@ -67,7 +66,7 @@ export default function ProductsList({ products, colors, sizes, types, csrf }: a
           textAlign: "center",
           marginBottom: "20px",
         }}
-      > Productos </h1>
+      >Productos</h1>
       <button
         className="px-3 py-1 rounded-md text-white bg-blue-600 hover:bg-blue-700 transition"
         onClick={() => {

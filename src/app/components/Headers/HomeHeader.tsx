@@ -16,10 +16,6 @@ export default function Header() {
           <Link href="/faq" className="hover:text-fuchsia-600">FAQ</Link>
           <Link href="/terms" className="hover:text-fuchsia-600">Terms</Link>
         </nav>
-
-        <div className="flex items-center gap-3">
-            <Link href="/admin/login" className="text-sm hover:text-fuchsia-600">Admin</Link>
-        </div>
       </div>
     </header>
   );

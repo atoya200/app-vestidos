@@ -1,5 +1,5 @@
-import  pool  from "../db";
-import { Item, Category, ItemFilters } from "../types";
+import pool from "@/lib/db";
+import { Item, Category, ItemFilters } from "@/lib/types";
 
 export async function getAllArticles(): Promise<Item[]> {
   const sql = `
@@ -21,7 +21,7 @@ export async function getAllArticles(): Promise<Item[]> {
   `;
 
   const { rows } = await pool.query(sql);
-  
+
   return Promise.all(rows.map(async (row: any) => {
     const sizes = await getAvailableSizesForArticle(row.id);
     return {
@@ -56,9 +56,9 @@ export async function getArticleById(id: number): Promise<Item | null> {
     FROM articles a
     JOIN article_types at ON a.article_type_id = at.id
     JOIN colors c ON a.color_id = c.id
-    WHERE a.id = $1 AND a.active = TRUE
+    WHERE a.id = $1
   `;
-  
+
   const { rows } = await pool.query(sql, [id]);
   if (rows.length === 0) return null;
 
@@ -133,7 +133,7 @@ export async function getArticlesByFilters(filters: ItemFilters): Promise<Item[]
   query += ` ORDER BY a.style, a.color_id, a.id`;
 
   const { rows } = await pool.query(query, params);
-  
+
   const items = await Promise.all(rows.map(async (row: any) => {
     const sizes = await getAvailableSizesForArticle(row.id);
     return {
@@ -163,11 +163,11 @@ export async function getAvailableSizesForArticle(itemId: number) {
     `SELECT style, color_id FROM articles WHERE id = $1`,
     [itemId]
   );
-  
+
   if (itemResult.rows.length === 0) return [];
-  
+
   const { style, color_id } = itemResult.rows[0];
-  
+
   const result = await pool.query(
     `
     SELECT DISTINCT s.size_label, s.id
@@ -196,13 +196,69 @@ export async function getArticleByStyleColorSize(style: string, colorId: number,
       AND stock > 0
     LIMIT 1
   `;
-  
+
   const { rows } = await pool.query(sql, [style, colorId, sizeId]);
   return rows[0] || null;
 }
 
-export async function getSizeIdByLabel(sizeLabel: string) {
-  const sql = `SELECT id FROM sizes WHERE size_label = $1 AND active = TRUE LIMIT 1`;
-  const { rows } = await pool.query(sql, [sizeLabel]);
-  return rows[0]?.id || null;
+
+export async function getProductsForDashboard() {
+  const sql = `
+    SELECT
+      a.id, 
+      a.article_type_id, 
+      t.type_name, 
+      a.size_id, 
+      s.size_label, 
+      a.color_id, 
+      c.color_name,
+      a."style", 
+      a.price_for_day, 
+      a.stock, 
+      a.image_url, 
+      a.description,
+      TO_CHAR(a.created_at, 'YYYY-MM-DD HH24') AS created_at,
+      TO_CHAR(a.modified_at , 'YYYY-MM-DD HH24:MI') AS modified_at,
+      TO_CHAR(a.deleted_at , 'YYYY-MM-DD HH24') AS deleted_at,
+      a.user_modified_id,
+      a.user_delete_id,
+      a.active,
+      COUNT(o.id) AS cantidad_reservas
+    FROM articles a 
+      JOIN article_types t ON a.article_type_id = t.id 
+      JOIN sizes s ON s.id = a.size_id 
+      JOIN colors c ON c.id = a.color_id 
+      LEFT JOIN orders o ON o.article_id = a.id AND start_date > NOW() AND status_id = 1
+    GROUP BY
+      a.id, a.article_type_id, t.type_name, a.size_id, s.size_label, a.color_id, c.color_name,
+      a."style", a.price_for_day, a.stock, a.image_url, a.description, a.created_at,
+      modified_at, a.deleted_at, a.user_modified_id, a.user_delete_id, a.active;
+  `;
+
+  const { rows } = await pool.query(sql);
+
+  return rows.map((row: any) => ({
+    id: row.id,
+    article_type_id: row.article_type_id,
+    type_name: row.type_name,
+    size_id: row.size_id,
+    size_label: row.size_label,
+    color_id: row.color_id,
+    color_name: row.color_name,
+    style: row.style,
+    price_for_day: row.price_for_day,
+    stock: row.stock,
+    image_url: row.image_url,
+    description: row.description,
+    created_at: row.created_at,
+    modified_at: row.modified_at,
+    deleted_at: row.deleted_at,
+    user_modified_id: row.user_modified_id,
+    user_delete_id: row.user_delete_id,
+    active: row.active,
+    cantidad_reservas: row.cantidad_reservas
+  }));
 }
+
+
+

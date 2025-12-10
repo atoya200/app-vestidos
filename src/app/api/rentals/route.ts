@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { verifyCsrfToken } from "../../../../lib/CsrfSessionManagement";
-import { getArticleById, getSizeIdByLabel, getArticleByStyleColorSize } from "../../../../lib/dao/productsDao";
-import { getOrdersByArticle, createOrder } from "../../../../lib/dao/rentalsDao";
+import { verifyCsrfToken } from "@/lib/CsrfSessionManagement";
+import { getArticleById, getArticleByStyleColorSize } from "@/lib/dao/productsDao";
+import { getOrdersByArticle, createOrder, getAllOrders } from "@/lib/dao/rentalsDao";
+import { getSizeIdByLabel } from "@/lib/dao/sizesDao";
 
 function normalizeDate(s: string | null) {
   if (!s) return null;
@@ -41,38 +42,38 @@ export async function POST(req: Request) {
     if (!sizeId) return NextResponse.json({ error: "Invalid size" }, { status: 400 });
 
     if (!item.colorId) return NextResponse.json({ error: "Item color not found" }, { status: 500 });
-    
+
     const articleVariant = await getArticleByStyleColorSize(item.style!, item.colorId, sizeId);
     if (!articleVariant) {
       return NextResponse.json({ error: "This size is not available for this item" }, { status: 400 });
     }
 
-  const actualArticleId = articleVariant.id;
+    const actualArticleId = articleVariant.id;
 
-  // Check how many of this article are rented during the requested period
-  const existingOrders = await getOrdersByArticle(actualArticleId);
-  
-  // Check availability for each day of the requested period
-  const reqStart = new Date(start);
-  const reqEnd = new Date(end);
-  
-  // Filter orders that overlap with the requested range to optimize
-  const relevantOrders = existingOrders.filter((order: any) => hasOverlap(start, end, order.start, order.end));
+    // Check how many of this article are rented during the requested period
+    const existingOrders = await getOrdersByArticle(actualArticleId);
 
-  for (let d = new Date(reqStart); d <= reqEnd; d.setDate(d.getDate() + 1)) {
-    const dayString = d.toISOString().split('T')[0];
-    
-    let rentalsOnThisDay = 0;
-    for (const order of relevantOrders) {
-      if (order.start <= dayString && order.end >= dayString) {
-        rentalsOnThisDay++;
+    // Check availability for each day of the requested period
+    const reqStart = new Date(start);
+    const reqEnd = new Date(end);
+
+    // Filter orders that overlap with the requested range to optimize
+    const relevantOrders = existingOrders.filter((order: any) => hasOverlap(start, end, order.start, order.end));
+
+    for (let d = new Date(reqStart); d <= reqEnd; d.setDate(d.getDate() + 1)) {
+      const dayString = d.toISOString().split('T')[0];
+
+      let rentalsOnThisDay = 0;
+      for (const order of relevantOrders) {
+        if (order.start <= dayString && order.end >= dayString) {
+          rentalsOnThisDay++;
+        }
+      }
+
+      if (rentalsOnThisDay >= articleVariant.stock) {
+        return NextResponse.json({ error: "Item not available for selected dates" }, { status: 409 });
       }
     }
-    
-    if (rentalsOnThisDay >= articleVariant.stock) {
-      return NextResponse.json({ error: "Item not available for selected dates" }, { status: 409 });
-    }
-  }
 
     // Calculate rental details
     const startDate = new Date(start);
@@ -114,7 +115,9 @@ export async function POST(req: Request) {
 
 
 
-export async function GET() {
+export async function GET(req: Request) {
+
+
   const rentals = await getAllOrders();
   return NextResponse.json(rentals);
 }

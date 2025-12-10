@@ -1,4 +1,4 @@
-import pool from "../db";
+import pool from "@/lib/db";
 
 export async function getColors() {
   const {rows} = await pool.query("SELECT id, color_name FROM colors WHERE active = true ORDER BY color_name");

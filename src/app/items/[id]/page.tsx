@@ -1,9 +1,9 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { getArticleById, getAvailableSizesForArticle } from "../../../../lib/dao/productsDao";
+import { getArticleById, getAvailableSizesForArticle } from "@/lib/dao/productsDao";
 import ItemWithSizeSelector from "./ItemWithSizeSelector";
 import ImageGallery from "./ImageGallery";
-import {getOrCreateCsrfToken} from "../../../../lib/CsrfSessionManagement";
+import {getOrCreateCsrfToken} from "@/lib/CsrfSessionManagement";
 import { StaticImport } from "next/dist/shared/lib/get-img-props";
 import { Key } from "react";
 import BackButton from "../../components/BackButton";

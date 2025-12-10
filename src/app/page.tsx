@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getAllArticles } from "../../lib/dao/productsDao";
+import { getAllArticles } from "@/lib/dao/productsDao";
+
+
 
 export default async function Home() {
   const allItems = await getAllArticles();
@@ -17,6 +19,15 @@ export default async function Home() {
     { emoji: "📦", title: "Rent", text: "Pick dates and get it delivered to your door." },
     { emoji: "✨", title: "Return", text: "Wear, wow, and send it back—cleaning included." },
   ];
+  
+
+  const today = (() => {
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, "0");
+    const dd = String(now.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  })();
 
   return (
     <main>
@@ -48,6 +59,7 @@ export default async function Home() {
                   id="start"
                   name="start"
                   type="date"
+                  min={today}
                   className="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-fuchsia-500"
                 />
               </div>
@@ -57,6 +69,7 @@ export default async function Home() {
                   id="end"
                   name="end"
                   type="date"
+                  min={today}
                   className="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-fuchsia-500"
                 />
               </div>

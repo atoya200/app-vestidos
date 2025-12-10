@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { getArticlesByFilters, getAvailableSizesForArticle } from "../../../../lib/dao/productsDao";
-import { Category } from "../../../../lib/types";
+import { getArticlesByFilters, getAvailableSizesForArticle } from "@/lib/dao/productsDao";
+import { Category } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +18,7 @@ export async function GET(req: Request) {
     const items = await Promise.all(
       articles.map(async (article: any) => {
         const sizes = await getAvailableSizesForArticle(article.id);
-        
+
         return {
           id: article.id,
           name: article.name,
@@ -33,7 +33,7 @@ export async function GET(req: Request) {
       })
     );
 
-    const filteredItems = size 
+    const filteredItems = size
       ? items.filter(item => item.sizes.includes(size))
       : items;
 

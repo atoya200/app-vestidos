@@ -70,7 +70,7 @@ export default function RentalForm({ itemId, csrf, selectedSize }: RentalFormPro
       const data = await response.json();
       setMessage({ type: 'success', text: 'Rental successfully completed' });
       form.reset(); // Usar la referencia guardada en lugar de e.currentTarget
-      
+
       // Disparar evento para actualizar el calendario
       window.dispatchEvent(new CustomEvent('rentalCreated'));
     } catch (error) {
@@ -81,81 +81,91 @@ export default function RentalForm({ itemId, csrf, selectedSize }: RentalFormPro
     }
   }
 
+
+  const today = (() => {
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, "0");
+    const dd = String(now.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  })();
+
   return (
     <>
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-3 rounded-2xl border p-4">
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-3 rounded-2xl border p-4 dark:border-slate-700 bg-white dark:bg-slate-900">
         <input type="hidden" name="itemId" value={itemId} />
         <input type="hidden" name="csrf" value={csrf} />
         <input type="hidden" name="size" value={selectedSize} />
         <div className="sm:col-span-2">
           <label className="sr-only" htmlFor="name">Full name</label>
-          <input 
-            id="name" 
-            name="name" 
-            required 
-            placeholder="Full name" 
+          <input
+            id="name"
+            name="name"
+            required
+            placeholder="Full name"
             className="w-full rounded-xl border px-4 py-3 text-sm"
             disabled={isSubmitting}
           />
         </div>
         <div>
           <label className="sr-only" htmlFor="email">Email</label>
-          <input 
-            id="email" 
-            name="email" 
-            type="email" 
-            required 
-            placeholder="Email" 
+          <input
+            id="email"
+            name="email"
+            type="email"
+            required
+            placeholder="Email"
             className="w-full rounded-xl border px-4 py-3 text-sm"
             disabled={isSubmitting}
           />
         </div>
         <div>
           <label className="sr-only" htmlFor="phone">Phone</label>
-          <input 
-            id="phone" 
-            name="phone" 
-            required 
-            placeholder="Phone" 
+          <input
+            id="phone"
+            name="phone"
+            required
+            placeholder="Phone"
             className="w-full rounded-xl border px-4 py-3 text-sm"
             disabled={isSubmitting}
           />
         </div>
         <div>
-          <label className="sr-only" htmlFor="start">Start date</label>
-          <input 
-            id="start" 
-            name="start" 
-            type="date" 
-            required 
+          <label htmlFor="start">Start date</label>
+          <input
+            id="start"
+            name="start"
+            type="date"
+            min={today}
+            required
             className="w-full rounded-xl border px-4 py-3 text-sm"
             disabled={isSubmitting}
           />
         </div>
         <div>
-          <label className="sr-only" htmlFor="end">End date</label>
-          <input 
-            id="end" 
-            name="end" 
-            type="date" 
-            required 
-            className="w-full rounded-xl border px-4 py-3 text-sm"
+          <label  htmlFor="end">End date</label>
+          <input
+            id="end"
+            name="end"
+            type="date"
+            min={today}
+            required
+            className="w-full rounded-xl border px-4 py-3 text-sm "
             disabled={isSubmitting}
           />
         </div>
-        
+
         {message && (
-          <div className={`sm:col-span-2 p-3 rounded-xl border-2 text-sm font-medium ${
-            message.type === 'success' 
-              ? 'border-green-600 text-green-600 dark:border-green-400 dark:text-green-400' 
-              : 'border-red-600 text-red-600 dark:border-red-400 dark:text-red-400'
-          }`}>
+          <div className={`sm:col-span-2 p-3 rounded-xl border-2 text-sm font-medium ${message.type === 'success'
+            ? 'border-green-600 text-green-600 dark:border-green-400 dark:text-green-400'
+            : 'border-red-600 text-red-600 dark:border-red-400 dark:text-red-400'
+            }`}>
             {message.text}
           </div>
         )}
-        
+
         <div className="sm:col-span-2">
-          <button 
+          <button
             type="submit"
             disabled={isSubmitting}
             className="w-full sm:w-auto rounded-xl bg-fuchsia-600 text-white px-6 py-3 text-sm font-semibold hover:bg-fuchsia-500 disabled:opacity-50 disabled:cursor-not-allowed"

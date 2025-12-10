@@ -1,7 +1,15 @@
 import { NextResponse } from "next/server";
-import pool from "../../../../../../../lib/db";
+import pool from "@/lib/db";
+import { verifyCsrfToken } from "@/lib/CsrfSessionManagement";
 
 export async function POST(req: Request, { params }: { params: { id: string } }) {
+
+
+  const headers = req.headers;
+  const validCsrf = await verifyCsrfToken(null, headers);
+  if (!validCsrf) {
+    return NextResponse.json({ error: "Invalid CSRF token" }, { status: 403 });
+  }
   const orderId = Number(params.id);
 
   // Simulás el usuario que cancela (luego lo vas a sacar del auth)
@@ -10,7 +18,10 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   try {
     // 1) Obtener la orden
     const orderRes = await pool.query(
-      `SELECT id, status_id FROM orders WHERE id = $1`,
+      `SELECT id,  case
+      	when start_date > now() and status_id = 1 then true
+      	else false
+      end cancelable  FROM orders WHERE id = $1`,
       [orderId]
     );
 
@@ -24,7 +35,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     const order = orderRes.rows[0];
 
     // 2) Validar que esté pendiente (asumiendo status_id = 1 es PENDIENTE)
-    if (order.status_id !== 1) {
+    if (!order.cancelable) {
       return NextResponse.json(
         { error: "Solo las órdenes pendientes pueden ser canceladas" },
         { status: 400 }
@@ -36,7 +47,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       `
       UPDATE orders
       SET 
-        status_id = 4,           -- 4 = Cancelado
+        status_id = 2,           
         canceled_at = NOW(),
         canceled_by_user_id = $1
       WHERE id = $2

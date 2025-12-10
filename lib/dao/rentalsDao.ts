@@ -1,5 +1,5 @@
-import  pool  from "../db";
-import { Rental } from "../types";
+import  pool  from "@/lib/db";
+import { Rental } from "@/lib/types";
 
 export async function getAllOrders(): Promise<Rental[]> {
   const sql = `
@@ -32,9 +32,13 @@ export async function getAllOrders(): Promise<Rental[]> {
       u.username AS created_by,
       o.user_id,
 
-      TO_CHAR(o.created_at, 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') AS created_at,
-      TO_CHAR(o.canceled_at, 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') AS canceled_at,
-      cu.username AS canceled_by
+      TO_CHAR(o.created_at, 'YYYY-MM-DD HH24') AS created_at,
+      TO_CHAR(o.canceled_at, 'YYYY-MM-DD HH24:MI') AS canceled_at,
+      cu.username AS canceled_by,
+      case
+      	when start_date > now() and status_id = 1 then true
+      	else false
+      end cancelable
     FROM orders o
     LEFT JOIN articles a ON a.id = o.article_id
     LEFT JOIN article_types at ON at.id = a.article_type_id
@@ -52,6 +56,12 @@ export async function getAllOrders(): Promise<Rental[]> {
     id: row.id.toString(),
     itemId: row.article_id,
     sizeId: row.size_id, 
+    size_label: row.size_label,
+    type_name: row.type_name,
+    price_per_day: row.article_price,
+    color_name: row.color_name,
+    style: row.style,
+    image_url: row.image_url,
     start: row.start_date,
     end: row.end_date,
     customer: {
@@ -60,7 +70,16 @@ export async function getAllOrders(): Promise<Rental[]> {
       phone: row.phone,
     },
     createdAt: row.created_at,
+    number_days: row.number_days,
+    order_price: row.order_price,
+    status_name: row.status_name,
+    start_date: row.start_date,
+    end_date: row.end_date,
+    created_at: row.created_at,
+    canceled_by_user_name: row.canceled_by,
+    canceled_at: row.canceled_at,
     status: row.canceled_at ? "canceled" : "active",
+    cancelable: row.cancelable,
   }));
 }
 
@@ -119,8 +138,4 @@ export async function createOrder(data: {
   return rows[0];
 }
 
-export async function cancelOrder(id: string) {
-  const sql = `UPDATE orders SET canceled_at = CURRENT_TIMESTAMP WHERE id = $1 RETURNING id`;
-  const { rows, rowCount } = await pool.query(sql, [id]);
-  return rowCount && rowCount > 0 ? rows[0] : null;
-}
+

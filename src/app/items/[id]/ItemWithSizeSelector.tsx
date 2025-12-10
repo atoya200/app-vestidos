@@ -36,7 +36,7 @@ export default function ItemWithSizeSelector({ itemId, availableSizes, csrf }: P
 
       <div className="mt-8">
         <h2 className="font-semibold mb-3">Availability for size {selectedSize}</h2>
-        <ItemCalendar itemId={itemId} selectedSize={selectedSize} />
+        <ItemCalendar itemId={itemId} selectedSize={selectedSize} csfr={csrf} />
         <p className="mt-2 text-xs text-slate-500">Dates marked are already booked for this size.</p>
       </div>
 

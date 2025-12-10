@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 
 export default function EditProductModal({
@@ -9,6 +8,7 @@ export default function EditProductModal({
   types,
   onClose,
   onUpdated,
+  csrf
 }: {
   product: any;
   colors: any[];
@@ -16,18 +16,21 @@ export default function EditProductModal({
   types: any[];
   onClose: () => void;
   onUpdated: (id: number) => void;
+  csrf: string;
 }) {
   const [price, setPrice] = useState<number>(Number.parseFloat(product.price_for_day) ?? 0);
   const [description, setDescription] = useState(product.description);
   const [style, setStyle] = useState(product.style);
   const [colorId, setColorId] = useState<number>(product.color_id);
   const [sizeId, setSizeId] = useState<number>(product.size_id);
-  const [typeId, setTypeId] = useState<number>(product.type_id);
+  const [typeId, setTypeId] = useState<number>(product.article_type_id);
+  const [stock, setStock] = useState<number>(product.stock);
 
   const [newImgBase64, setNewImgBase64] = useState<string | null>(null);
   const [previewImg, setPreviewImg] = useState<string | null>(null);
 
   async function handleSubmit() {
+    debugger
     const payload = {
       id: product.id,
       price,
@@ -36,14 +39,14 @@ export default function EditProductModal({
       color_id: colorId,
       size_id: sizeId,
       type_id: typeId,
-      new_image_base64: newImgBase64, // 🔥 Enviamos la imagen así
+      new_image_base64: newImgBase64, 
+      stock
     };
-
-    
-    const res = await fetch(`/api/items/${product.id}/update`, {
-      method: "POST",
+    const res = await fetch(`/api/items/${product.id}`, {
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
+          "x-csrf-token": csrf
       },
       body: JSON.stringify(payload),
     });
@@ -53,7 +56,7 @@ export default function EditProductModal({
       return;
     }
 
-    alert("Actualizado!");
+    alert(`Producto ${product.id} actualizado con exito`);
     onUpdated(product.id); 
     onClose();
   }
@@ -84,12 +87,26 @@ export default function EditProductModal({
         <input
           type="number"
           min="0"
-          step="0.10"
+          step="1"
           className={inputClass}
           value={price}
           onChange={(e) => {
             const v = parseFloat(e.target.value);
             setPrice(isNaN(v) || v < 0 ? 0 : v);
+          }}
+        />
+
+        {/* STOCK */}
+        <label className={labelClass}>Stock Actual:</label>
+        <input
+          type="number"
+          min="1"
+          step="1"
+          className={inputClass}
+          value={stock}
+          onChange={(e) => {
+            const v = parseInt(e.target.value);
+            setStock(isNaN(v) || v < 0 ? 0 : v);
           }}
         />
 

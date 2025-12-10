@@ -1,9 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
-import { getArticlesByFilters } from "../../../lib/dao/productsDao";
-import { Category } from "../../../lib/types";
+import { getArticlesByFilters } from "@/lib/dao/productsDao";
+import { Category } from "@/lib/types";
 import BackButton from "../components/BackButton";
-import {getColors} from "../../../lib/dao/colorDao";
+import {getColors} from "@/lib/dao/colorDao";
 
 type SearchParams = {
   q?: string; 

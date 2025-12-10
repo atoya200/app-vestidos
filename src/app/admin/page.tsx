@@ -4,7 +4,7 @@ import BackButton from "../components/BackButton";
 
 
 export default async function Page() {
-  if (!isAdmin()) {
+  if (!await isAdmin()) {
     redirect("/admin/login")
 } else {
     redirect("/admin/dashboard")

@@ -1,10 +1,17 @@
 import { NextResponse } from "next/server";
-import { pool } from "@/lib/db";
+import pool from "@/lib/db";
 import bcrypt from "bcryptjs";
-
+import {verifyCsrfToken} from "@/lib/CsrfSessionManagement";
 
 export async function POST(req: Request) {
   try {
+
+    const headers = req.headers;
+    const validCsrf = await verifyCsrfToken(null, headers);
+    if (!validCsrf) {
+      return NextResponse.json({ error: "Invalid CSRF token" }, { status: 403 });
+    }
+
     const body = await req.json();
 
     const username = (body.username || "").trim();

@@ -115,7 +115,7 @@ test('Filtrado de vestidos por talla', async ({ page }) => {
 });
 
 
-test('TC-RF-002-03: Filtrado por cada estilo disponible', async ({ page }) => {
+test('Filtrado por cada estilo disponible', async ({ page }) => {
 
     const estilosExistentes = ['evening', 'black-tie', 'daytime', 'cocktail'];
   
@@ -180,5 +180,8 @@ test('Búsqueda con caracteres especiales', async ({ page }) => {
     }
   }
 });
+
+
+
 
 

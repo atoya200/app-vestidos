@@ -1,34 +1,27 @@
-import { isAdmin } from "@/lib/CsrfSessionManagement";
+import { isAdmin, getOrCreateCsrfToken } from "@/lib/CsrfSessionManagement";
 import { redirect } from "next/navigation";
 import OrdersList from "./OrdersList";
 
 async function fetchOrders() {
-  const res = await fetch(`${process.env.NEXT_URL_API}/api/admin/orders`, {
-    cache: "no-store"
+  const csrf = await getOrCreateCsrfToken()
+  const res = await fetch(`${process.env.NEXT_URL_API}/api/rentals`, {
+    cache: "no-store",
+    credentials: "include",
+    headers: {
+      "x-csrf-token": csrf
+    },
   });
   return res.json();
 }
 
 export default async function OrdersPage() {
-  if (!isAdmin()) redirect("/admin/login");
-
+  if (!await isAdmin()) redirect("/admin/login");
+  
+  const csrf = await getOrCreateCsrfToken()
   const orders = await fetchOrders();
 
-return (
-  <div>
-    <h1
-      style={{
-        width: "100%",
-        fontSize: "40px",
-        textAlign: "center",
-        marginBottom: "20px",
-      }}
-    >
-      Ordenes
-    </h1>
-
-    <OrdersList orders={orders} />
-  </div>
-);
+  return (
+    <OrdersList orders={orders} csrf={csrf} />
+  );
 
 }

@@ -10,7 +10,7 @@ function toISO(d: Date) {
   return d.toISOString().slice(0, 10);
 }
 
-export default function ItemCalendar({ itemId, selectedSize }: Props) {
+export default function ItemCalendar({ itemId, selectedSize, csfr}: {itemId: number, selectedSize: string, csfr: string}) {
   const [busy, setBusy] = useState<Range[]>([]);
 
   useEffect(() => {
@@ -18,7 +18,7 @@ export default function ItemCalendar({ itemId, selectedSize }: Props) {
       ? `/api/items/${itemId}/availability?size=${selectedSize}`
       : `/api/items/${itemId}/availability`;
     
-    fetch(url)
+    fetch(url, { cache: "no-store" , headers: { "x-csrf-token": csfr} })
       .then((r) => r.json())
       .then((data) => setBusy(data.rentals ?? []))
       .catch(() => setBusy([]));

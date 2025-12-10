@@ -1,0 +1,20 @@
+// app/components/Header.tsx
+import Link from "next/link";
+
+export default function Header() {
+  return (
+    <header className="sticky top-0 z-30 backdrop-blur bg-white/70 dark:bg-slate-950/60 border-b border-slate-200/60 dark:border-slate-800">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <Link href="/" className="font-extrabold text-xl tracking-tight">
+          GlamRent
+        </Link>
+
+        <nav className="hidden md:flex items-center gap-8 text-sm">
+          <Link href="/search" className="hover:text-fuchsia-600">Browse</Link>
+          <Link href="/faq" className="hover:text-fuchsia-600">FAQ</Link>
+          <Link href="/terms" className="hover:text-fuchsia-600">Terms</Link>
+        </nav>
+      </div>
+    </header>
+  );
+}

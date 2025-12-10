@@ -3,5 +3,5 @@ import { getColors } from "@/lib/dao/colorDao";
 
 export async function GET() {
   const data = await getColors();
-  return NextResponse.json(data);
+  return NextResponse.json(data); 
 }

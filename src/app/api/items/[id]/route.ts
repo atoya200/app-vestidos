@@ -88,6 +88,7 @@ export async function PUT(req: Request, context: { params: any }) {
 
         const {
             id,
+            price,
             description,
             style,
             type_id,
@@ -129,7 +130,8 @@ export async function PUT(req: Request, context: { params: any }) {
         image_url = COALESCE($5, image_url),
         modified_at = NOW(),
         article_type_id =  COALESCE($6, article_type_id),
-        stock = COALESCE($8, stock)
+        stock = COALESCE($8, stock),
+        price_for_day = COALESCE($9, price_for_day)
       WHERE id = $7
     `;
 
@@ -141,7 +143,8 @@ export async function PUT(req: Request, context: { params: any }) {
             imageUrl,
             type_id,
             id,
-            stock
+            stock,
+            price
         ]);
 
         return NextResponse.json({ ok: true });
